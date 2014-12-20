@@ -161,10 +161,12 @@ public class BoxJumpGame {
 
     public Bitmap[] loadShip(Bitmap[] mShipFlying, Context mContext) {
         Resources mRes = mContext.getResources();
-        mShipFlying[0] = BitmapFactory.decodeResource(mRes, R.drawable.aa_00_1); // ship2_1
-        mShipFlying[1] = BitmapFactory.decodeResource(mRes, R.drawable.aa_00_2);
-        mShipFlying[2] = BitmapFactory.decodeResource(mRes, R.drawable.aa_00_1);
-        mShipFlying[3] = BitmapFactory.decodeResource(mRes, R.drawable.aa_00_2);
+        mShipFlying[0] = BitmapFactory.decodeResource(mRes, R.drawable.box_blue); // ship2_1
+        mShipFlying[1] = BitmapFactory.decodeResource(mRes, R.drawable.box_blue_90); // ship2_1
+        mShipFlying[2] = BitmapFactory.decodeResource(mRes, R.drawable.box_blue_180); // ship2_1
+        mShipFlying[3] = BitmapFactory.decodeResource(mRes, R.drawable.box_blue_270); // ship2_1
+        // rotate or use sprite ?
+        // tam thoi giu 4 sprite
 
         return mShipFlying;
     }

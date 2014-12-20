@@ -2,6 +2,7 @@ package com.littlewing.archangle.app;
 
 /**
  * Created by dungnv on 11/8/14.
+ * Point co san roi, lieu co can custom ?
  */
 public class Point {
     private int x;

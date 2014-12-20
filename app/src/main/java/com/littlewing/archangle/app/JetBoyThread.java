@@ -103,7 +103,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         setInitialGameState();
 
-        boxjump.mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.open_00_720); //title_hori
+        boxjump.mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.bg1); //title_hori
 
         mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.background0_00); // bg_a
 
@@ -115,7 +115,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         mShipFlying = boxjump.loadShip(mShipFlying, mContext);
         mBeam = boxjump.loadBeam(mBeam, mContext);
 
-        mTimerShell = BitmapFactory.decodeResource(mRes, R.drawable.ui_00);
+        mTimerShell = BitmapFactory.decodeResource(mRes, R.drawable.cmyk);
 
         // I wanted them to rotate in a certain way
         // so I loaded them backwards from the way created.
