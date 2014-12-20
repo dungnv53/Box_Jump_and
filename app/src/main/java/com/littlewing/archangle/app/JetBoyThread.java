@@ -31,69 +31,10 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     // the number of asteroids that must be destroyed
     public static final int mSuccessThreshold = 50;
 
-    // used to calculate level for mutes and trigger clip
-    public int mHitStreak = 0;
+    // hit animation
+    private Bitmap[] mExplosions = new Bitmap[4];
 
-    // total number asteroids you need to hit.
-    public int mHitTotal = 0;
-
-    // which music bed is currently playing?
-    public int mCurrentBed = 0;
-
-    // a lazy graphic fudge for the initial title splash
-    public Bitmap mTitleBG;
-
-    public Bitmap mTitleBG2;
-
-    /**
-     * State-tracking constants.
-     */
-    public static final int STATE_START = -1;
-    public static final int STATE_PLAY = 0;
-    public static final int STATE_LOSE = 1;
-    public static final int STATE_PAUSE = 2;
-    public static final int STATE_RUNNING = 3;
-
-    public static final int LEFT = 0;
-    public static final int RIGHT = 1;
-    public static final int UP = 2;
-    public static final int DOWN = 3;
-
-    public static final int DIR_LEFT = 1;
-    public static final int DIR_RIGHT = -1;
-    public static final int DIR_UP = 1;
-    public static final int DIR_DOWN = -1;
-
-    // how many frames per beat? The basic animation can be changed for
-    // instance to 3/4 by changing this to 3.
-    // untested is the impact on other parts of game logic for non 4/4 time.
-    private static final int ANIMATION_FRAMES_PER_BEAT = 4;
-
-    public boolean mInitialized = false;
-
-    /** Queue for GameEvents */
-    protected ConcurrentLinkedQueue<GameEvent> mEventQueue = new ConcurrentLinkedQueue<GameEvent>();
-
-    /** Context for processKey to maintain state accross frames * */
-    protected Object mKeyContext = null;
-
-    // the timer display in seconds
-    public int mTimerLimit;
-
-    // used for internal timing logic.
-    public final int TIMER_LIMIT = 72;
-
-    // string value for timer display
-    private String mTimerValue = "1:12";
-
-    // start, play, running, lose are the states we use
-    public int mState;
-
-    // has laser been fired and for how long?
-    // user for fx logic on laser fire
-    boolean mLaserOn = true;
-
-    long mLaserFireTime = 0;
+    protected static BoxJumpGame boxjump = new BoxJumpGame();
 
     /** The drawable to use as the far background of the animation canvas */
     private Bitmap mBackgroundImageFar;
@@ -104,15 +45,6 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     /** The 2nd drawable to use as the close background of the animation canvas */
     private Bitmap mBackgroundImageTwo;
 
-    // JET info: event IDs within the JET file.
-    // JET info: in this game 80 is used for sending asteroid across the screen
-    // JET info: 82 is used as game time for 1/4 note beat.
-    private final byte NEW_ASTEROID_EVENT = 80;
-    private final byte TIMER_EVENT = 82;
-
-    // used to track beat for synch of mute/unmute actions
-    private int mBeatCount = 1;
-
     // our intrepid space boy
     private Bitmap[] mShipFlying = new Bitmap[4];
 
@@ -122,32 +54,19 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     // the things you are trying to hit
     private Bitmap[] mAsteroids = new Bitmap[12];
 
-    // hit animation
-    private Bitmap[] mExplosions = new Bitmap[4];
-
     private Bitmap mTimerShell;
 
     private Bitmap mLaserShot;
 
-    // used to save the beat event system time.
-    private long mLastBeatTime;
-
-    private long mPassedTime;
-
-    // how much do we move the asteroids per beat?
-    private int mPixelMoveX = 25;
-
-    // the asteroid send events are generated from the Jet File.
-    // but which land they start in is random.
-    private Random mRandom = new Random();
+    /** Message handler used by thread to interact with TextView */
+    private Handler mHandler;
 
     // JET info: the star of our show, a reference to the JetPlayer object.
     private JetPlayer mJet = null;
 
-    private boolean mJetPlaying = false;
+    private Craft angel; // Angel instance
 
-    /** Message handler used by thread to interact with TextView */
-    private Handler mHandler;
+    Resources mRes;
 
     /** Handle to the surface manager object we interact with */
     private SurfaceHolder mSurfaceHolder;
@@ -155,91 +74,20 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     /** Handle to the application context, used to e.g. fetch Drawables. */
     private Context mContext;
 
-    /** Indicate whether the surface has been created & is ready to draw */
-    private boolean mRun = false;
-
-    // updates the screen clock. Also used for tempo timing.
-    private Timer mTimer = null;
-
-    private TimerTask mTimerTask = null;
-
-    // one second - used to update timer
-    private int mTaskIntervalInMillis = 1000;
-
-    /**
-     * Current height of the surface/canvas.
-     *
-     * @see #setSurfaceSize
-     */
-    private int mCanvasHeight = 1;
-
-    /**
-     * Current width of the surface/canvas.
-     *
-     * @see #setSurfaceSize
-     */
-    private int mCanvasWidth = 1;
-
-    // used to track the picture to draw for ship animation
-    private int mShipIndex = 0;
-
-    // stores all of the asteroid objects in order
-    private Vector<Asteroid> mDangerWillRobinson;
-
-    private Vector<Explosion> mExplosion;
-
-    // right to left scroll tracker for near and far BG
-    private int mBGFarMoveX = 0;
-    private int mBGNearMoveX = 0;
-    private int mBGTwoMoveX = 0;
-    private int mBGThreeMoveX = 0;
-    private int mBGFourMoveX = 0;
-    private int mBGFiveMoveX = 0;
-
-    // screen width, height
-    private int mWidth = 720; //(int)getWidth();
-    private int mHeight = 1280; //(int)getHeight();
-
-    // how far up (close to top) jet boy can fly
-    private int mJetBoyYMin = mWidth/3*2; //40;
-    private int mJetBoyX = (int)mWidth/2; //0;
-    private int mJetBoyY = (int)mHeight/3*2; //0;
-
-    // this is the pixel position of the laser beam guide.
-    private int mAsteroidMoveLimitX = 110;
-
-    // how far up asteroid can be painted
-    private int mAsteroidMinY = 40;
-
-
-    Resources mRes;
-
-    // array to store the mute masks that are applied during game play to respond to
-    // the player's hit streaks
     private boolean muteMask[][] = new boolean[9][32];
 
-    public static final String TAG = "JetBoy";
-
-    private Craft angel; // Angel instance
     private double angle = 0;  // angle of bernoulli curve
 
+    // how many frames per beat? The basic animation can be changed for
+    // instance to 3/4 by changing this to 3.
+    // untested is the impact on other parts of game logic for non 4/4 time.
+    private static final int ANIMATION_FRAMES_PER_BEAT = 4;
 
-    // Direction moving
-    private int MOVE_DIR = 0; // moving dir
+    // JET info: event IDs within the JET file.
+    // JET info: in this game 80 is used for sending asteroid across the screen
+    // JET info: 82 is used as game time for 1/4 note beat.
+    private final byte NEW_ASTEROID_EVENT = 80;
 
-    // Speed of BG move
-    private int FarBGSpeed = 0;
-    private int NearBGSpeed = 0;
-    private int mBGTwoSpeed = 0;
-    private int mBGThreeSpeed = 0;
-
-    /**
-     * This is the constructor for the main worker bee
-     *
-     * @param surfaceHolder
-     * @param context
-     * @param handler
-     */
     public JetBoyThread(SurfaceHolder surfaceHolder, Context context, Handler handler) {
 
         mSurfaceHolder = surfaceHolder;
@@ -248,21 +96,15 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         mRes = context.getResources();
 
         SoundTrack myTrack = new SoundTrack();         // Call soundtrack class to init mute mask
-        muteMask = myTrack.initMuteMask(muteMask);
 
         // always set state to start, ensure we come in from front door if
         // app gets tucked into background
-        mState = STATE_START;
+        boxjump.mState = boxjump.STATE_START;
 
         setInitialGameState();
 
-        mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.open_00_720); //title_hori
+        boxjump.mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.open_00_720); //title_hori
 
-        // load background image as a Bitmap instead of a Drawable b/c
-        // we don't need to transform it and it's faster to draw this
-        // way...thanks lunar lander :)
-
-        // two background since we want them moving at different speeds
         mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.background0_00); // bg_a
 
         mLaserShot = BitmapFactory.decodeResource(mRes, R.drawable.laser);
@@ -270,40 +112,18 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         mBackgroundImageNear = BitmapFactory.decodeResource(mRes, R.drawable.background2_09); // bg_b
         mBackgroundImageTwo = BitmapFactory.decodeResource(mRes, R.drawable.background2_07); // bg_b
 
-        mShipFlying[0] = BitmapFactory.decodeResource(mRes, R.drawable.aa_00_1); // ship2_1
-        mShipFlying[1] = BitmapFactory.decodeResource(mRes, R.drawable.aa_00_2);
-        mShipFlying[2] = BitmapFactory.decodeResource(mRes, R.drawable.aa_00_1);
-        mShipFlying[3] = BitmapFactory.decodeResource(mRes, R.drawable.aa_00_2);
-
-        mBeam[0] = BitmapFactory.decodeResource(mRes, R.drawable.effect_10); //intbeam_1
-        mBeam[1] = BitmapFactory.decodeResource(mRes, R.drawable.effect_11);
-        mBeam[2] = BitmapFactory.decodeResource(mRes, R.drawable.effect_12);
-        mBeam[3] = BitmapFactory.decodeResource(mRes, R.drawable.effect_12);
+        mShipFlying = boxjump.loadShip(mShipFlying, mContext);
+        mBeam = boxjump.loadBeam(mBeam, mContext);
 
         mTimerShell = BitmapFactory.decodeResource(mRes, R.drawable.ui_00);
 
         // I wanted them to rotate in a certain way
         // so I loaded them backwards from the way created.
-        mAsteroids[11] = BitmapFactory.decodeResource(mRes, R.drawable.boss1_08); // ast01
-        mAsteroids[10] = BitmapFactory.decodeResource(mRes, R.drawable.boss3_08);
-        mAsteroids[9] = BitmapFactory.decodeResource(mRes, R.drawable.boss5_08);
-        mAsteroids[8] = BitmapFactory.decodeResource(mRes, R.drawable.boss18); // ast04
-        mAsteroids[7] = BitmapFactory.decodeResource(mRes, R.drawable.boss37);
-        mAsteroids[6] = BitmapFactory.decodeResource(mRes, R.drawable.boss2_08);
-        mAsteroids[5] = BitmapFactory.decodeResource(mRes, R.drawable.boss26);
-        mAsteroids[4] = BitmapFactory.decodeResource(mRes, R.drawable.boss66); //ast08
-        mAsteroids[3] = BitmapFactory.decodeResource(mRes, R.drawable.boss6_08);
-        mAsteroids[2] = BitmapFactory.decodeResource(mRes, R.drawable.boss6_08);
-        mAsteroids[1] = BitmapFactory.decodeResource(mRes, R.drawable.boss6_08);
-        mAsteroids[0] = BitmapFactory.decodeResource(mRes, R.drawable.boss6_08);
+        mAsteroids = boxjump.loadAsteroid(mAsteroids, mContext);
 
-        mExplosions[0] = BitmapFactory.decodeResource(mRes, R.drawable.effect_07);
-        mExplosions[1] = BitmapFactory.decodeResource(mRes, R.drawable.effect_08);
-        mExplosions[2] = BitmapFactory.decodeResource(mRes, R.drawable.effect_09);
-        mExplosions[3] = BitmapFactory.decodeResource(mRes, R.drawable.effect_09);
+        mExplosions = boxjump.loadExplosion(mExplosions, mContext);
 
         angel = new Craft(480, 640, mAsteroids);
-
     }
 
     /**
@@ -315,7 +135,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // JET info: if we already had one, the same singleton is returned.
         mJet = JetPlayer.getJetPlayer();
 
-        mJetPlaying = false;
+        boxjump.setJetPlaying(false);
 
         // JET info: make sure we flush the queue,
         // JET info: otherwise left over events from previous gameplay can hang around.
@@ -328,7 +148,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // JET info: inthis animation thread object.
         mJet.setEventListener(this);
 
-        Log.d(TAG, "opening jet file");
+        Log.d(boxjump.TAG, "opening jet file");
 
         // JET info: load the actual JET content the game will be playing,
         // JET info: it's stored as a raw resource in our APK, and is labeled "level1"
@@ -336,12 +156,12 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // JET info: if our JET file was stored on the sdcard for instance, we would have used
         // JET info: mJet.loadJetFile("/sdcard/level1.jet");
 
-        Log.d(TAG, "opening jet file DONE");
+        Log.d(boxjump.TAG, "opening jet file DONE");
 
-        mCurrentBed = 0;
+        boxjump.mCurrentBed = 0;
         byte sSegmentID = 0;
 
-        Log.d(TAG, " start queuing jet file");
+        Log.d(boxjump.TAG, " start queuing jet file");
 
         // JET info: now we're all set to prepare queuing the JET audio segments for the game.
         // JET info: in this example, the game uses segment 0 for the duration of the game play,
@@ -365,20 +185,20 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // JET info: the player hasn't scored yet.
         mJet.setMuteArray(muteMask[0], true);
 
-        Log.d(TAG, " start queuing jet file DONE");
+        Log.d(boxjump.TAG, " start queuing jet file DONE");
 
     }
 
 
     private void doDraw(Canvas canvas) {
 
-        if (mState == STATE_RUNNING) {
+        if (boxjump.mState == boxjump.STATE_RUNNING) {
             doDrawRunning(canvas);
-        } else if (mState == STATE_START) {
+        } else if (boxjump.mState == boxjump.STATE_START) {
             doDrawReady(canvas);
-        } else if (mState == STATE_PLAY || mState == STATE_LOSE) {
-            if (mTitleBG2 == null) {
-                mTitleBG2 = BitmapFactory.decodeResource(mRes, R.drawable.intro_00_720); //title_bg_hori
+        } else if (boxjump.mState == boxjump.STATE_PLAY || boxjump.mState == boxjump.STATE_LOSE) {
+            if (boxjump.mTitleBG2 == null) {
+                boxjump.mTitleBG2 = BitmapFactory.decodeResource(mRes, R.drawable.intro_00_720); //title_bg_hori
             }
             doDrawPlay(canvas);
         }// end state play block
@@ -389,125 +209,75 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
      * Draws current state of the game Canvas.
      */
     private void doDrawRunning(Canvas canvas) {
-
-        // decrement the far background
-        mBGFarMoveX = mBGFarMoveX - (FarBGSpeed+1)*MOVE_DIR;
-
-        // decrement the near background
-        mBGNearMoveX = mBGNearMoveX - (NearBGSpeed+6)*MOVE_DIR; // def 4, increase speed near
-
-        // Add new bg 2 simulate more real bg run
-        mBGTwoMoveX = mBGTwoMoveX - 5*MOVE_DIR; // def 4, increase speed near
-
-        // calculate the wrap factor for matching image draw
-        int newFarX = mBackgroundImageFar.getWidth() - (-mBGFarMoveX*MOVE_DIR);
-
         // if we have scrolled all the way, reset to start
-        if (newFarX <= 0) {
-            mBGFarMoveX = 0;
-            // only need one draw
-            canvas.drawBitmap(mBackgroundImageFar, mBGFarMoveX, 0, null);
-
-        } else {
-            // need to draw original and wrap
-            canvas.drawBitmap(mBackgroundImageFar, mBGFarMoveX, 0, null);
-            canvas.drawBitmap(mBackgroundImageFar, newFarX, 0, null);
-        }
+        canvas.drawBitmap(mBackgroundImageFar, 0, 0, null);
 
         // same story different image...
         // TODO possible method call
-        int newNearX = mBackgroundImageNear.getWidth() - (-mBGNearMoveX*MOVE_DIR);
 
-        if (newNearX <= 0) {
-            mBGNearMoveX = 0;
-            canvas.drawBitmap(mBackgroundImageNear, mBGNearMoveX, 0, null);
-
-        } else {
-            canvas.drawBitmap(mBackgroundImageNear, mBGNearMoveX, 0, null);
-            canvas.drawBitmap(mBackgroundImageNear, newNearX, 0, null);
-        }
+        canvas.drawBitmap(mBackgroundImageNear, 0, 0, null);
 
         // same story different image...
-        // TODO chuyen qua ham
-        // BG thu 2th
-        int newTwoX = mBackgroundImageTwo.getWidth() - (-mBGTwoMoveX*MOVE_DIR);       // Move right --> left, now want 2 dir move.
 
-        if (newTwoX <= 0) {
-            mBGTwoMoveX = 0;
-            canvas.drawBitmap(mBackgroundImageTwo, mBGTwoMoveX, 720, null);  // 720 la hard fix
+        canvas.drawBitmap(mBackgroundImageTwo, 0, 720, null);  // 720 la hard fix
 
-        } else {
-            canvas.drawBitmap(mBackgroundImageTwo, mBGTwoMoveX, 720, null);
-            canvas.drawBitmap(mBackgroundImageTwo, newNearX, 720, null);
-        }
+        canvas.drawBitmap(mBeam[boxjump.getShipIndex()], boxjump.getCanvasWidth()/2 - 51, boxjump.getCanvasHeight()/2 + 320, null);  // y old code use m-num ?
 
-        doAsteroidAnimation(canvas);
+        boxjump.setShipIndex(boxjump.getShipIndex() +1);
 
-        canvas.drawBitmap(mBeam[mShipIndex], mCanvasWidth/2 - 51, mCanvasHeight/2 + 320, null);  // y old code use m-num ?
-//            canvas.drawBitmap(mBeam[mShipIndex], 51 + 20, 0, null);
+        if (boxjump.getShipIndex() == 4)
+            boxjump.setShipIndex(0);
 
-        mShipIndex++;
+        canvas.drawBitmap(mShipFlying[boxjump.getShipIndex()], boxjump.mJetBoyX, boxjump.getCanvasHeight() - 181, null);
 
-        if (mShipIndex == 4)
-            mShipIndex = 0;
-
-        // draw the space ship in the same lane as the next asteroid
-//            canvas.drawBitmap(mShipFlying[mShipIndex], mJetBoyX, mJetBoyY, null);
-//        canvas.drawBitmap(mShipFlying[mShipIndex], mCanvasWidth/2 - 81, mCanvasHeight - 181, null);
-        canvas.drawBitmap(mShipFlying[mShipIndex], mJetBoyX, mCanvasHeight - 181, null);
-
-        if (mLaserOn) {
-            canvas.drawBitmap(mLaserShot, mJetBoyX, mJetBoyY + 32, null);
-            Log.d(TAG, " drawing shot " + mJetBoyX + " at " + mJetBoyY);
+        if (boxjump.mLaserOn) {
+            canvas.drawBitmap(mLaserShot, boxjump.mJetBoyX, boxjump.mJetBoyY + 32, null);
+            Log.d(boxjump.TAG, " drawing shot " + boxjump.mJetBoyX + " at " + boxjump.mJetBoyY);
         }
 
         // tick tock
         canvas.drawBitmap(mTimerShell, 0, 0, null); // mCanvasWidth - mTimerShell.getWidth()
 
-//        this.angle += 1;
-//        this.angel.bernoulliMove(angle);
-//
-//        canvas.drawBitmap(angel.getBossImage(), angel.getDonaldX(), angel.getDonaldY(), null);
-
     }
 
     private void setInitialGameState() {
-        mTimerLimit = TIMER_LIMIT;
+        boxjump.mTimerLimit = boxjump.TIMER_LIMIT;
 
-        mJetBoyY = mJetBoyYMin;
+        boxjump.mJetBoyY = boxjump.mJetBoyYMin;
 
         // set up jet stuff
         initializeJetPlayer();
 
-        mTimer = new Timer();
+        boxjump.setTimer(new Timer());
 
-        mDangerWillRobinson = new Vector<Asteroid>();
+        boxjump.mDangerWillRobinson = new Vector<Asteroid>();
 
-        mExplosion = new Vector<Explosion>();
+        boxjump.mExplosion = new Vector<Explosion>();
 
-        mInitialized = true;
+        boxjump.mInitialized = true;
 
-        mHitStreak = 0;
-        mHitTotal = 0;
+        boxjump.mHitStreak = 0;
+        boxjump.mHitTotal = 0;
     }
 
     private void doAsteroidAnimation(Canvas canvas) {
-        if ((mDangerWillRobinson == null | mDangerWillRobinson.size() == 0)
-                && (mExplosion != null && mExplosion.size() == 0))
+        if ((boxjump.getDangerWillRobinson() == null | boxjump.getDangerWillRobinson().size() == 0)
+                && (boxjump.mExplosion != null && boxjump.mExplosion.size() == 0))
             return;
 
         // Compute what percentage through a beat we are and adjust
         // animation and position based on that. This assumes 140bpm(428ms/beat).
         // This is just inter-beat interpolation, no game state is updated
-        long frameDelta = System.currentTimeMillis() - mLastBeatTime;
+        long frameDelta = System.currentTimeMillis() - boxjump.getLastBeatTime();
 
         int animOffset = (int)(ANIMATION_FRAMES_PER_BEAT * frameDelta / 428);
 
-        for (int i = (mDangerWillRobinson.size() - 1); i >= 0; i--) {
-            Asteroid asteroid = mDangerWillRobinson.elementAt(i);
+        for (int i = (boxjump.getDangerWillRobinson().size() - 1); i >= 0; i--) {
+            Vector dangerRobinson = boxjump.getDangerWillRobinson();
+            Asteroid asteroid = (Asteroid)dangerRobinson.elementAt(i);
 
             if (!asteroid.mMissed)
-                mJetBoyY = asteroid.mDrawY;
+                boxjump.mJetBoyY = asteroid.mDrawY;
 
             // Log.d(TAG, " drawing asteroid " + ii + " at " +
             // asteroid.mDrawX );
@@ -517,8 +287,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                     asteroid.mDrawX, asteroid.mDrawY, null);
         }
 
-        for (int i = (mExplosion.size() - 1); i >= 0; i--) {
-            Explosion ex = mExplosion.elementAt(i);
+        for (int i = (boxjump.mExplosion.size() - 1); i >= 0; i--) {
+            Explosion ex = boxjump.mExplosion.elementAt(i);
 
             canvas.drawBitmap(mExplosions[(ex.mAniIndex + animOffset) % mExplosions.length],
                     ex.mDrawX, ex.mDrawY, null);
@@ -532,11 +302,11 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     }
 
     private void doDrawReady(Canvas canvas) {
-        canvas.drawBitmap(mTitleBG, 0, 0, null);
+        canvas.drawBitmap(boxjump.mTitleBG, 0, 0, null);
     }
 
     private void doDrawPlay(Canvas canvas) {
-        canvas.drawBitmap(mTitleBG2, 0, 0, null);
+        canvas.drawBitmap(boxjump.mTitleBG2, 0, 0, null);
     }
 
 
@@ -545,46 +315,46 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
      */
     public void run() {
         // while running do stuff in this loop...bzzz!
-        while (mRun) {
+        while (boxjump.getRun()) {
             Canvas c = null;
 
-            if (mState == STATE_RUNNING) {
+            if (boxjump.mState == boxjump.STATE_RUNNING) {
                 // Process any input and apply it to the game state
                 updateGameState();
 
-                if (!mJetPlaying) {
+                if (!boxjump.getJetPlaying()) {
 
-                    mInitialized = false;
-                    Log.d(TAG, "------> STARTING JET PLAY");
+                    boxjump.mInitialized = false;
+                    Log.d(boxjump.TAG, "------> STARTING JET PLAY");
 
-                    Log.d(TAG, "----> " + mJetBoyX + "<---------" + mJetBoyY);
+                    Log.d(boxjump.TAG, "----> " + boxjump.mJetBoyX + "<---------" + boxjump.mJetBoyY);
                     mJet.play();
 
-                    mJetPlaying = true;
+                    boxjump.setJetPlaying(true);
 
                 }
 
-                mPassedTime = System.currentTimeMillis();
+                boxjump.setPassedTime(System.currentTimeMillis());
 
                 // kick off the timer task for counter update if not already
                 // initialized
-                if (mTimerTask == null) {
-                    mTimerTask = new TimerTask() {
+                if (boxjump.getTimerTask() == null) {
+                    boxjump.setTimerTask(new TimerTask() {
                         public void run() {
                             doCountDown();
                         }
-                    };
+                    });
 
-                    mTimer.schedule(mTimerTask, mTaskIntervalInMillis);
+                    boxjump.getTimer().schedule(boxjump.getTimerTask(), boxjump.mTaskIntervalInMillis);
 
                 }// end of TimerTask init block
 
             }// end of STATE_RUNNING block
-            else if (mState == STATE_PLAY && !mInitialized)
+            else if (boxjump.mState == boxjump.STATE_PLAY && !boxjump.mInitialized)
             {
                 setInitialGameState();
-            } else if (mState == STATE_LOSE) {
-                mInitialized = false;
+            } else if (boxjump.mState == boxjump.STATE_LOSE) {
+                boxjump.mInitialized = false;
             }
 
             try {
@@ -614,7 +384,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     protected void updateGameState() {
         // Process any game events and apply them
         while (true) {
-            GameEvent event = mEventQueue.poll();
+            GameEvent event = boxjump.mEventQueue.poll();
             if (event == null)
                 break;
 
@@ -624,14 +394,14 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
             // calls
             if (event instanceof KeyGameEvent) {
                 // Process the key for affects other then asteroid hits
-                mKeyContext = processKeyEvent((KeyGameEvent)event, mKeyContext);
+                boxjump.mKeyContext = processKeyEvent((KeyGameEvent)event, boxjump.mKeyContext);
 
                 // Update laser state. Having this here allows the laser to
                 // be triggered right when the key is
                 // pressed. If we comment this out the laser will only be
                 // turned on when updateLaser is called
                 // when processing a timer event below.
-                updateLaser(mKeyContext);
+                updateLaser(boxjump.mKeyContext);
 
             }
             // JET events trigger a state update
@@ -639,23 +409,23 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 JetGameEvent jetEvent = (JetGameEvent)event;
 
                 // Only update state on a timer event
-                if (jetEvent.value == TIMER_EVENT) {
+                if (jetEvent.value == boxjump.getTIMER_EVENT()) {
                     // Note the time of the last beat
-                    mLastBeatTime = System.currentTimeMillis();
+                    boxjump.setLastBeatTime(System.currentTimeMillis());
 
                     // Update laser state, turning it on if a key has been
                     // pressed or off if it has been
                     // on for too long.
-                    updateLaser(mKeyContext);
+                    updateLaser(boxjump.mKeyContext);
 
                     // Update explosions before we update asteroids because
                     // updateAsteroids may add
                     // new explosions that we do not want updated until next
                     // frame
-                    updateExplosions(mKeyContext);
+                    updateExplosions(boxjump.mKeyContext);
 
                     // Update asteroid positions, hit status and animations
-                    updateAsteroids(mKeyContext);
+                    updateAsteroids(boxjump.mKeyContext);
                 }
 
                 processJetEvent(jetEvent.player, jetEvent.segment, jetEvent.track,
@@ -712,12 +482,12 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // inputContext);
 
         // If the laser has been on too long shut it down
-        if (mLaserOn && System.currentTimeMillis() - mLaserFireTime > 400) {
+        if (boxjump.mLaserOn && System.currentTimeMillis() - boxjump.mLaserFireTime > 400) {
 //                mLaserOn = false;  // tat laser
         }
 
         // trying to tune the laser hit timing
-        else if (System.currentTimeMillis() - mLaserFireTime > 300) {
+        else if (System.currentTimeMillis() - boxjump.mLaserFireTime > 300) {
             // JET info: the laser sound is on track 23, we mute it (true) right away (false)
             mJet.setMuteFlag(23, true, false);
 
@@ -728,10 +498,10 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // logic so it can be turned back on in the same frame it was turned
         // off in. If we want
         // to add a cooldown period this may change.
-        if (!mLaserOn && System.currentTimeMillis() - keyTime <= 400) {
+        if (!boxjump.mLaserOn && System.currentTimeMillis() - keyTime <= 400) {
 
-            mLaserOn = true;
-            mLaserFireTime = keyTime;
+            boxjump.mLaserOn = true;
+            boxjump.mLaserFireTime = keyTime;
 
             // JET info: unmute the laser track (false) right away (false)
             mJet.setMuteFlag(23, false, false);
@@ -742,32 +512,32 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
      * Update asteroid state including position and laser hit status.
      */
     protected void updateAsteroids(Object inputContext) {
-        if (mDangerWillRobinson == null | mDangerWillRobinson.size() == 0)
+        if (boxjump.mDangerWillRobinson == null | boxjump.mDangerWillRobinson.size() == 0)
             return;
 
-        for (int i = (mDangerWillRobinson.size() - 1); i >= 0; i--) {
-            Asteroid asteroid = mDangerWillRobinson.elementAt(i);
+        for (int i = (boxjump.mDangerWillRobinson.size() - 1); i >= 0; i--) {
+            Asteroid asteroid = boxjump.mDangerWillRobinson.elementAt(i);
 
             // If the asteroid is within laser range but not already missed
             // check if the key was pressed close enough to the beat to make a hit
-            if (asteroid.mDrawX <= mAsteroidMoveLimitX + 20 && !asteroid.mMissed)
+            if (asteroid.mDrawX <= boxjump.mAsteroidMoveLimitX + 20 && !asteroid.mMissed)
             {
                 // If the laser was fired on the beat destroy the asteroid
-                if (mLaserOn) {
+                if (boxjump.mLaserOn) {
                     // Track hit streak for adjusting music
-                    mHitStreak++;
-                    mHitTotal++;
+                    boxjump.mHitStreak++;
+                    boxjump.mHitTotal++;
 
                     // replace the asteroid with an explosion
                     Explosion ex = new Explosion();
                     ex.mAniIndex = 0;
                     ex.mDrawX = asteroid.mDrawX;
                     ex.mDrawY = asteroid.mDrawY;
-                    mExplosion.add(ex);
+                    boxjump.mExplosion.add(ex);
 
                     mJet.setMuteFlag(24, false, false);
 
-                    mDangerWillRobinson.removeElementAt(i);
+                    boxjump.getDangerWillRobinson().removeElementAt(i);
 
                     // This asteroid has been removed process the next one
                     continue;
@@ -777,17 +547,17 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                     // within range
                     asteroid.mMissed = true;
 
-                    mHitStreak = mHitStreak - 1;
+                    boxjump.mHitStreak = boxjump.mHitStreak - 1;
 
-                    if (mHitStreak < 0)
-                        mHitStreak = 0;
+                    if (boxjump.mHitStreak < 0)
+                        boxjump.mHitStreak = 0;
 
                 }
             }
 
             // Update the asteroids position, even missed ones keep moving
-            asteroid.mDrawX -= mPixelMoveX;
-            asteroid.mDrawY += mPixelMoveX; // dungnv add. asteroid move down
+            asteroid.mDrawX -= boxjump.getPixelMoveX();
+            asteroid.mDrawY += boxjump.getPixelMoveX(); // dungnv add. asteroid move down
 
             // Update asteroid animation frame
             asteroid.mAniIndex = (asteroid.mAniIndex + ANIMATION_FRAMES_PER_BEAT)
@@ -795,7 +565,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
             // if we have scrolled off the screen
             if (asteroid.mDrawX < 0) {
-                mDangerWillRobinson.removeElementAt(i);
+                boxjump.getDangerWillRobinson().removeElementAt(i);
             }
         }
     }
@@ -805,11 +575,11 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
      * have completed.
      */
     protected void updateExplosions(Object inputContext) {
-        if (mExplosion == null | mExplosion.size() == 0)
+        if (boxjump.mExplosion == null | boxjump.mExplosion.size() == 0)
             return;
 
-        for (int i = mExplosion.size() - 1; i >= 0; i--) {
-            Explosion ex = mExplosion.elementAt(i);
+        for (int i = boxjump.mExplosion.size() - 1; i >= 0; i--) {
+            Explosion ex = boxjump.mExplosion.elementAt(i);
 
             ex.mAniIndex += ANIMATION_FRAMES_PER_BEAT;
 
@@ -818,7 +588,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 mJet.setMuteFlag(24, true, false);
                 mJet.setMuteFlag(23, true, false);
 
-                mExplosion.removeElementAt(i);
+                boxjump.mExplosion.removeElementAt(i);
             }
         }
     }
@@ -833,16 +603,15 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         //Log.d(TAG, "onJetEvent(): seg=" + segment + " track=" + track + " chan=" + channel
         //        + " cntrlr=" + controller + " val=" + value);
 
-
         // Check for an event that triggers a new asteroid
         if (value == NEW_ASTEROID_EVENT) {
             doAsteroidCreation();
         }
 
-        mBeatCount++;
+        boxjump.setBeatCount(boxjump.getBeatCount() +1);
 
-        if (mBeatCount > 4) {
-            mBeatCount = 1;
+        if (boxjump.getBeatCount() > 4) {
+            boxjump.setBeatCount(1);
 
         }
 
@@ -854,103 +623,101 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // determine the music "intensity"
         // if the intensity has go gone up, call a corresponding trigger clip, otherwise just
         // execute the rest of the music bed change logic.
-        if (mBeatCount == 1) {
+        if (boxjump.getBeatCount() == 1) {
 
             // do it back wards so you fall into the correct one
-            if (mHitStreak > 28) {
+            if (boxjump.mHitStreak > 28) {
 
                 // did the bed change?
-                if (mCurrentBed != 7) {
+                if (boxjump.mCurrentBed != 7) {
                     // did it go up?
-                    if (mCurrentBed < 7) {
+                    if (boxjump.mCurrentBed < 7) {
                         mJet.triggerClip(7);
                     }
 
-                    mCurrentBed = 7;
+                    boxjump.mCurrentBed = 7;
                     // JET info: change the mute mask to update the way the music plays based
                     // JET info: on the player's skills.
                     mJet.setMuteArray(muteMask[7], false);
 
                 }
-            } else if (mHitStreak > 24) {
-                if (mCurrentBed != 6) {
-                    if (mCurrentBed < 6) {
+            } else if (boxjump.mHitStreak > 24) {
+                if (boxjump.mCurrentBed != 6) {
+                    if (boxjump.mCurrentBed < 6) {
                         // JET info: quite a few asteroids hit, trigger the clip with the guy's
                         // JET info: voice that encourages the player.
                         mJet.triggerClip(6);
                     }
 
-                    mCurrentBed = 6;
+                    boxjump.mCurrentBed = 6;
                     mJet.setMuteArray(muteMask[6], false);
                 }
-            } else if (mHitStreak > 20) {
-                if (mCurrentBed != 5) {
-                    if (mCurrentBed < 5) {
+            } else if (boxjump.mHitStreak > 20) {
+                if (boxjump.mCurrentBed != 5) {
+                    if (boxjump.mCurrentBed < 5) {
                         mJet.triggerClip(5);
                     }
 
-                    mCurrentBed = 5;
+                    boxjump.mCurrentBed = 5;
                     mJet.setMuteArray(muteMask[5], false);
                 }
-            } else if (mHitStreak > 16) {
-                if (mCurrentBed != 4) {
+            } else if (boxjump.mHitStreak > 16) {
+                if (boxjump.mCurrentBed != 4) {
 
-                    if (mCurrentBed < 4) {
+                    if (boxjump.mCurrentBed < 4) {
                         mJet.triggerClip(4);
                     }
-                    mCurrentBed = 4;
+                    boxjump.mCurrentBed = 4;
                     mJet.setMuteArray(muteMask[4], false);
                 }
-            } else if (mHitStreak > 12) {
-                if (mCurrentBed != 3) {
-                    if (mCurrentBed < 3) {
+            } else if (boxjump.mHitStreak > 12) {
+                if (boxjump.mCurrentBed != 3) {
+                    if (boxjump.mCurrentBed < 3) {
                         mJet.triggerClip(3);
                     }
-                    mCurrentBed = 3;
+                    boxjump.mCurrentBed = 3;
                     mJet.setMuteArray(muteMask[3], false);
                 }
-            } else if (mHitStreak > 8) {
-                if (mCurrentBed != 2) {
-                    if (mCurrentBed < 2) {
+            } else if (boxjump.mHitStreak > 8) {
+                if (boxjump.mCurrentBed != 2) {
+                    if (boxjump.mCurrentBed < 2) {
                         mJet.triggerClip(2);
                     }
 
-                    mCurrentBed = 2;
+                    boxjump.mCurrentBed = 2;
                     mJet.setMuteArray(muteMask[2], false);
                 }
-            } else if (mHitStreak > 4) {
-                if (mCurrentBed != 1) {
+            } else if (boxjump.mHitStreak > 4) {
+                if (boxjump.mCurrentBed != 1) {
 
-                    if (mCurrentBed < 1) {
+                    if (boxjump.mCurrentBed < 1) {
                         mJet.triggerClip(1);
                     }
 
                     mJet.setMuteArray(muteMask[1], false);
 
-                    mCurrentBed = 1;
+                    boxjump.mCurrentBed = 1;
                 }
             }
         }
     }
-
 
     private void doAsteroidCreation() {
         // Log.d(TAG, "asteroid created");
 
         Asteroid _as = new Asteroid();
 
-        int drawIndex = mRandom.nextInt(4);
+        int drawIndex = boxjump.getRandom().nextInt(4);
 
         // TODO Remove hard coded value
-        _as.mDrawY = mAsteroidMinY + (drawIndex * 63);
+        _as.mDrawY = boxjump.mAsteroidMinY + (drawIndex * 63);
 
-        _as.mDrawX = (mCanvasWidth - mAsteroids[0].getWidth());
+        _as.mDrawX = (boxjump.getCanvasWidth() - mAsteroids[0].getWidth());
 
         _as.mStartTime = System.currentTimeMillis();
 
-        mDangerWillRobinson.add(_as);
+        boxjump.mDangerWillRobinson.add(_as);
     }
-
 
     /**
      * Used to signal the thread whether it should be running or not.
@@ -961,14 +728,13 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
      * @param b true to run, false to shut down
      */
     public void setRunning(boolean b) {
-        mRun = b;
+        boxjump.setRun(b);
 
-        if (mRun == false) {
-            if (mTimerTask != null)
-                mTimerTask.cancel();
+        if (boxjump.getRun() == false) {
+            if (boxjump.getTimerTask() != null)
+                boxjump.getTimerTask().cancel();
         }
     }
-
 
     /**
      * returns the current int value of game state as defined by state
@@ -978,10 +744,9 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
      */
     public int getGameState() {
         synchronized (mSurfaceHolder) {
-            return mState;
+            return boxjump.mState;
         }
     }
-
 
     /**
      * Sets the game mode. That is, whether we are running, paused, in the
@@ -996,7 +761,6 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         }
     }
 
-
     /**
      * Sets state based on input, optionally also passing in a text message.
      *
@@ -1008,54 +772,52 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         synchronized (mSurfaceHolder) {
 
             // change state if needed
-            if (mState != state) {
-                mState = state;
+            if (boxjump.mState != state) {
+                boxjump.mState = state;
             }
 
-            if (mState == STATE_PLAY) {
+            if (boxjump.mState == boxjump.STATE_PLAY) {
                 Resources res = mContext.getResources();
                 mBackgroundImageFar = BitmapFactory
                         .decodeResource(res, R.drawable.background0_00); //background_a
 
                 // don't forget to resize the background image
                 mBackgroundImageFar = Bitmap.createScaledBitmap(mBackgroundImageFar,
-                        mCanvasWidth * 2, mCanvasHeight, true);
+                        boxjump.getCanvasWidth() * 2, boxjump.getCanvasHeight(), true);
 
                 mBackgroundImageNear = BitmapFactory.decodeResource(res,
                         R.drawable.background_near); //background_b
 
                 // don't forget to resize the background image
                 mBackgroundImageNear = Bitmap.createScaledBitmap(mBackgroundImageNear,
-                        mCanvasWidth * 2, mCanvasHeight, true);
+                        boxjump.getCanvasWidth() * 2, boxjump.getCanvasHeight(), true);
 
-            } else if (mState == STATE_RUNNING) {
+            } else if (boxjump.mState == boxjump.STATE_RUNNING) {
                 // When we enter the running state we should clear any old
                 // events in the queue
-                mEventQueue.clear();
+                boxjump.mEventQueue.clear();
 
                 // And reset the key state so we don't think a button is pressed when it isn't
-                mKeyContext = null;
+                boxjump.mKeyContext = null;
             }
 
         }
     }
 
-
     /**
      * Add key press input to the GameEvent queue
      */
     public boolean doKeyDown(int keyCode, KeyEvent msg) {
-        mEventQueue.add(new KeyGameEvent(keyCode, false, msg));
+        boxjump.mEventQueue.add(new KeyGameEvent(keyCode, false, msg));
 
         return true;
     }
-
 
     /**
      * Add key press input to the GameEvent queue
      */
     public boolean doKeyUp(int keyCode, KeyEvent msg) {
-        mEventQueue.add(new KeyGameEvent(keyCode, true, msg));
+        boxjump.mEventQueue.add(new KeyGameEvent(keyCode, true, msg));
 
         return true;
     }
@@ -1069,20 +831,18 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE:
                 if (inRange(x, 220, 120) && inRange(y, 860, 260)) { // tap on left side TODO hardcode
-                    MOVE_DIR = DIR_LEFT; // move to left, set DIR
-                    heroMove(12, LEFT);
+                    boxjump.MOVE_DIR = boxjump.DIR_LEFT; // move to left, set DIR
+                    heroMove(12, boxjump.LEFT);
                 } else if (inRange(x, 0, 120) && inRange(y, 860, 260)) { // tap on right side 170-50 for center
-                    MOVE_DIR = DIR_RIGHT; // move to right, set DIR
-                    heroMove(12, RIGHT);
+                    boxjump.MOVE_DIR = boxjump.DIR_RIGHT; // move to right, set DIR
+                    heroMove(12, boxjump.RIGHT);
                 }
                 // Move up n down
                 if(inRange(x, 120, 100) && inRange(y, 840, 100)) {
-                    speedUp();
-                    heroMove(12, UP);
+                    heroMove(12, boxjump.UP);
                 }
                 if(inRange(x, 120, 100) && inRange(y, 1020, 100)) {
-                    speedDown();
-                    heroMove(12, DOWN);
+                    heroMove(12, boxjump.DOWN);
                 }
                 break;
             case MotionEvent.ACTION_DOWN:
@@ -1116,35 +876,35 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     public void heroMove(int delta, int direction) {
         switch(direction) {
             // TODO set boundary by screen W-H ratio
-            case LEFT:                // move left
-                if(inRange(mJetBoyX, 150, 410)) {
-                    mJetBoyX += delta;
+            case 0:                // move left
+                if(inRange(boxjump.mJetBoyX, 150, 410)) {
+                    boxjump.mJetBoyX += delta;
                 } else {
-                    mJetBoyX=300;
+                    boxjump.mJetBoyX=300;
                 }
                 heroMotion();
                 break;
-            case RIGHT:               // move right
-                if(inRange(mJetBoyX, 150, 410)) {
-                    mJetBoyX -= delta;
+            case 1:               // move right
+                if(inRange(boxjump.mJetBoyX, 150, 410)) {
+                    boxjump.mJetBoyX -= delta;
                 } else {
-                    mJetBoyX = 300;
+                    boxjump.mJetBoyX = 300;
                 }
                 heroMotion();
                 break;
-            case UP:               // move up
-                if(inRange(mJetBoyX, 360, 235)) {
-                    mJetBoyX -= delta;
+            case 2:               // move up
+                if(inRange(boxjump.mJetBoyX, 360, 235)) {
+                    boxjump.mJetBoyX -= delta;
                 } else {
-                    mJetBoyX  = 470;
+                    boxjump.mJetBoyX  = 470;
                 }
                 heroMotion();
                 break;
-            case DOWN:               // move down
-                if(inRange(mJetBoyY, 360, 235)) {
-                    mJetBoyY += delta;
+            case 3:               // move down
+                if(inRange(boxjump.mJetBoyY, 360, 235)) {
+                    boxjump.mJetBoyY += delta;
                 } else {
-                    mJetBoyY = 480;
+                    boxjump.mJetBoyY = 480;
                 }
                 heroMotion();
                 break;
@@ -1154,15 +914,15 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
     // Use sprite image to animate hero move
     public void heroMotion() {
-        if (mShipIndex < 2) {
-            mShipIndex++;
-            if (mShipIndex == 2) mShipIndex = 0;
-            else if (mShipIndex == 0) mShipIndex = 1;
+        if (boxjump.getShipIndex() < 2) {
+            boxjump.setShipIndex(boxjump.getShipIndex()+1);
+            if (boxjump.getShipIndex() == 2) boxjump.setShipIndex(0);
+            else if (boxjump.getShipIndex() == 0) boxjump.setShipIndex(1);
         } else {
-            mShipIndex = 1;
-            mShipIndex++;
-            if (mShipIndex == 2) mShipIndex = 0;
-            else if (mShipIndex == 0) mShipIndex = 1;
+            boxjump.setShipIndex(1);
+            boxjump.setShipIndex(boxjump.getShipIndex()+1);
+            if (boxjump.getShipIndex() == 2) boxjump.setShipIndex(0);
+            else if (boxjump.getShipIndex() == 0) boxjump.setShipIndex(1);
         }
     }
 
@@ -1170,8 +930,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     public void setSurfaceSize(int width, int height) {
         // synchronized to make sure these all change atomically
         synchronized (mSurfaceHolder) {
-            mCanvasWidth = width;
-            mCanvasHeight = height;
+            boxjump.setCanvasWidth(width);
+            boxjump.setCanvasHeight(height);
 
             // don't forget to resize the background image
             mBackgroundImageFar = Bitmap.createScaledBitmap(mBackgroundImageFar, width * 2,
@@ -1183,16 +943,12 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         }
     }
 
-
-    /**
-     * Pauses the physics update & animation.
-     */
     public void pause() {
         synchronized (mSurfaceHolder) {
-            if (mState == STATE_RUNNING)
-                setGameState(STATE_PAUSE);
-            if (mTimerTask != null) {
-                mTimerTask.cancel();
+            if (boxjump.mState == boxjump.STATE_RUNNING)
+                setGameState(boxjump.STATE_PAUSE);
+            if (boxjump.getTimerTask() != null) {
+                boxjump.getTimerTask().cancel();
             }
 
             if (mJet != null) {
@@ -1201,60 +957,55 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         }
     }
 
-    /**
-     * Does the work of updating timer
-     *
-     */
     private void doCountDown() {
         //Log.d(TAG,"Time left is " + mTimerLimit);
 
-        mTimerLimit = mTimerLimit - 1;
+        boxjump.mTimerLimit = boxjump.mTimerLimit - 1;
         try {
             //subtract one minute and see what the result is.
-            int moreThanMinute = mTimerLimit - 60;
+            int moreThanMinute = boxjump.mTimerLimit - 60;
 
             if (moreThanMinute >= 0) {
 
                 if (moreThanMinute > 9) {
-                    mTimerValue = "1:" + moreThanMinute;
+                    boxjump.setTimerValue("1:" + moreThanMinute);
 
                 }
                 //need an extra '0' for formatting
                 else {
-                    mTimerValue = "1:0" + moreThanMinute;
+                    boxjump.setTimerValue("1:0" + moreThanMinute);
                 }
             } else {
-                if (mTimerLimit > 9) {
-                    mTimerValue = "0:" + mTimerLimit;
+                if (boxjump.mTimerLimit > 9) {
+                    boxjump.setTimerValue("0:" + boxjump.mTimerLimit);
                 } else {
-                    mTimerValue = "0:0" + mTimerLimit;
+                    boxjump.setTimerValue("0:0" + boxjump.mTimerLimit);
                 }
             }
         } catch (Exception e1) {
-            Log.e(TAG, "doCountDown threw " + e1.toString());
+            Log.e(boxjump.TAG, "doCountDown threw " + e1.toString());
         }
 
         Message msg = mHandler.obtainMessage();
 
         Bundle b = new Bundle();
-        b.putString("text", mTimerValue);
+        b.putString("text", boxjump.getTimerValue());
 
         //time's up
-        if (mTimerLimit == 0) {
-            b.putString("STATE_LOSE", "" + STATE_LOSE);
-            mTimerTask = null;
+        if (boxjump.mTimerLimit == 0) {
+            b.putString("STATE_LOSE", "" + boxjump.STATE_LOSE);
+            boxjump.setTimerTask(null);
 
-            mState = STATE_LOSE;
+            boxjump.mState = boxjump.STATE_LOSE;
 
         } else {
-
-            mTimerTask = new TimerTask() {
+            boxjump.setTimerTask(new TimerTask() {
                 public void run() {
                     doCountDown();
                 }
-            };
+            });
 
-            mTimer.schedule(mTimerTask, mTaskIntervalInMillis);
+            boxjump.getTimer().schedule(boxjump.getTimerTask(), boxjump.mTaskIntervalInMillis);
         }
 
         //this is how we send data back up to the main JetBoyView thread.
@@ -1279,7 +1030,6 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
     }
 
-
     // JET info: JET event listener interface implementation:
     /**
      * The method which receives notification from event listener.
@@ -1297,14 +1047,10 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
      */
     public void onJetEvent(JetPlayer player, short segment, byte track, byte channel,
                            byte controller, byte value) {
-
-        //Log.d(TAG, "jet got event " + value);
-
         //events fire outside the animation thread. This can cause timing issues.
         //put in queue for processing by animation thread.
-        mEventQueue.add(new JetGameEvent(player, segment, track, channel, controller, value));
+        boxjump.mEventQueue.add(new JetGameEvent(player, segment, track, channel, controller, value));
     }
-
 
     // JET info: JET event listener interface implementation:
     public void onJetPauseUpdate(JetPlayer player, int paused) {
@@ -1318,24 +1064,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
     }
 
-
-    // Tang / giam toc do game
-    public void speedUp() {
-        if(inRange(FarBGSpeed, 0, 8)) { // Gioi han tang toc do.
-            FarBGSpeed += 2;
-        }
-        if(inRange(NearBGSpeed, 1, 9)) { // Gioi han tang toc do.
-            NearBGSpeed += 2;
-        }
-    }
-    // Tang / giam toc do game
-    public void speedDown() {
-        if(inRange(FarBGSpeed, 2, 8)) { // Gioi han tang toc do.
-            FarBGSpeed -= 2;
-        }
-        if(inRange(NearBGSpeed, 3, 9)) { // Gioi han tang toc do.
-            NearBGSpeed -= 2;
-        }
+    public static BoxJumpGame getBoxjump() {
+        return boxjump;
     }
 
 }//end thread class

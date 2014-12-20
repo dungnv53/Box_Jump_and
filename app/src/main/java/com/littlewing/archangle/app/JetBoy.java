@@ -89,20 +89,20 @@ public class JetBoy extends Activity implements View.OnClickListener {
      */
     public void onClick(View v) {
         // this is the first screen
-        if (mJetBoyThread.getGameState() == JetBoyThread.STATE_START) {
+        if (mJetBoyThread.getGameState() == JetBoyThread.getBoxjump().STATE_START) {
             mButton.setText("PLAY!");
             mTextView.setVisibility(View.VISIBLE);
 
             mTextView.setText(R.string.helpText);
-            mJetBoyThread.setGameState(JetBoyThread.STATE_PLAY);
+            mJetBoyThread.setGameState(JetBoyThread.getBoxjump().STATE_PLAY);
 
         }
         // we have entered game play, now we about to start running
-        else if (mJetBoyThread.getGameState() == JetBoyThread.STATE_PLAY) {
+        else if (mJetBoyThread.getGameState() == JetBoyThread.getBoxjump().STATE_PLAY) {
             mButton.setVisibility(View.INVISIBLE);
             mTextView.setVisibility(View.INVISIBLE);
             mTimerView.setVisibility(View.VISIBLE);
-            mJetBoyThread.setGameState(JetBoyThread.STATE_RUNNING);
+            mJetBoyThread.setGameState(JetBoyThread.getBoxjump().STATE_RUNNING);
 
         }
         // this is a retry button
@@ -118,12 +118,12 @@ public class JetBoy extends Activity implements View.OnClickListener {
             mButton.setText("PLAY!");
             mButton.setVisibility(View.VISIBLE);
 
-            mJetBoyThread.setGameState(JetBoyThread.STATE_PLAY);
+            mJetBoyThread.setGameState(JetBoyThread.getBoxjump().STATE_PLAY);
 
         } else {
             Log.d("JB VIEW", "unknown click " + v.getId());
 
-            Log.d("JB VIEW", "state is  " + mJetBoyThread.mState);
+            Log.d("JB VIEW", "state is  " + mJetBoyThread.getBoxjump().mState);
 
         }
     }
