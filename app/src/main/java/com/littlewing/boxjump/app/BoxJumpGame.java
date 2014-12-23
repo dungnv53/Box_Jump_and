@@ -1,12 +1,9 @@
-package com.littlewing.archangle.app;
+package com.littlewing.boxjump.app;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.JetPlayer;
-import android.os.Handler;
-import android.view.SurfaceHolder;
 
 import java.util.Random;
 import java.util.Timer;

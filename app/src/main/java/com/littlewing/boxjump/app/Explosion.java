@@ -16,13 +16,10 @@
 
 // FIXME: review and cleanup
 
-package com.littlewing.archangle.app;
+package com.littlewing.boxjump.app;
 
-public class Asteroid {
+public class Explosion {
     public int mAniIndex = 0;
     public int mDrawY = 0;
     public int mDrawX = 0;
-    public boolean mExploding = false;
-    public boolean mMissed = false;
-    public long mStartTime = 0;
 }

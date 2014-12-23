@@ -1,4 +1,4 @@
-package com.littlewing.archangle.app;
+package com.littlewing.boxjump.app;
 
 /**
  * Created by dungnv on 11/6/14.

@@ -1,4 +1,4 @@
-package com.littlewing.archangle.app;
+package com.littlewing.boxjump.app;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -14,11 +14,9 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by dungnv on 11/6/14.

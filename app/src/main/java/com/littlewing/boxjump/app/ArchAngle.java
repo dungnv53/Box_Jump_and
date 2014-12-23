@@ -1,9 +1,11 @@
-package com.littlewing.archangle.app;
+package com.littlewing.boxjump.app;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.littlewing.boxjump.app.R;
 
 
 public class ArchAngle extends Activity {

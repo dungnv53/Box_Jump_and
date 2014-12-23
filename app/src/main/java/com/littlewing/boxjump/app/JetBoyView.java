@@ -18,32 +18,19 @@
 // Android JET demonstration code:
 // All inline comments related to the use of the JetPlayer class are preceded by "JET info:"
 
-package com.littlewing.archangle.app;
+package com.littlewing.boxjump.app;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.media.JetPlayer;
-import android.media.JetPlayer.OnJetEventListener;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.view.MotionEvent;
 

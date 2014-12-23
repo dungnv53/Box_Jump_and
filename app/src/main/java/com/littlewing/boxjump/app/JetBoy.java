@@ -17,9 +17,7 @@
 // Android JET demonstration code:
 // See the JetBoyView.java file for examples on the use of the JetPlayer class.
 
-package com.littlewing.archangle.app;
-
-import com.littlewing.archangle.app.JetBoyThread;
+package com.littlewing.boxjump.app;
 
 import android.app.Activity;
 import android.os.Bundle;
