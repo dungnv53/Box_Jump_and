@@ -3,6 +3,7 @@ package com.littlewing.boxjump.app;
 import java.util.Random;
 
 import android.graphics.Bitmap;
+import android.graphics.Point;
 
 /**
  * Created by dungnv on 11/6/14.
@@ -199,8 +200,8 @@ public class Craft {
     // TODO need fps, inp, screen width
     public void bernoulliMove(double angle) {
         angle = angle%360;
-        this.dn_x = 360+getBernoulliMark(angle).getX();
-        this.dn_y = 240+getBernoulliMark(angle).getY();
+        this.dn_x = 360+getBernoulliMark(angle).x;
+        this.dn_y = 240+getBernoulliMark(angle).y;
     }
 
     // TODO rm magic numb

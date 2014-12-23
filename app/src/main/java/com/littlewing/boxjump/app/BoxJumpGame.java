@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 
 import java.util.Random;
 import java.util.Timer;
@@ -34,6 +35,7 @@ public class BoxJumpGame {
     public static final int DIR_UP = 1;
     public static final int DIR_DOWN = -1;
 
+    public static final int BOX_STEP = 10; // box run 10px per step
 
     // used to calculate level for mutes and trigger clip
     public int mHitStreak = 0;
@@ -227,6 +229,22 @@ public class BoxJumpGame {
         this.mCanvasHeight = canvasHeight;
     }
 
+    public int getScreenWidth() {
+        return this.mWidth;
+    }
+
+    public void setScreenWidth(int scr_width) {
+        this.mWidth = scr_width;
+    }
+
+    public int getScreenHeight() {
+        return this.mHeight;
+    }
+
+    public void setScreenHeight(int scr_height) {
+        this.mHeight = scr_height;
+    }
+
     public void setLastBeatTime(long time) {
         this.mLastBeatTime = time;
     }
@@ -325,5 +343,23 @@ public class BoxJumpGame {
 
     public void setBeatCount(int mBeatCount) {
         this.mBeatCount = mBeatCount;
+    }
+
+    public void drawBoxRunning(Canvas canvas, Bitmap[] mShipFlying) {
+        canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181, null);
+        if(mJetBoyX >= getBounce()) {
+            mJetBoyX = getStartLeft();
+        }
+    }
+
+    private int getBounce() {
+        int box_size = mWidth*10/12 / 25; // chia ra 25 o phan box playing,
+        // screen width co vien ngoai 1/12 moi ben.
+        return mWidth*11/12 - 2*box_size; // scrn_width chia lam 12 phan --> can phai 1 phan con 11.
+        // bo o cuoi cung cach ra. Do canvas ve start_x, y Top-Right nen cach 1 o nua.
+    }
+
+    private int getStartLeft() {
+        return mWidth/12; // scrn_width chia lam 12 phan --> can phai 1 phan con 11.
     }
 }

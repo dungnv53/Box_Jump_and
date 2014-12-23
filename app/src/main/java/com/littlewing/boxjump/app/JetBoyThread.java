@@ -5,14 +5,17 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.media.JetPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.view.WindowManager;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -92,6 +95,12 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         mHandler = handler;
         mContext = context;
         mRes = context.getResources();
+
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        boxjump.setScreenWidth(size.x);
 
         SoundTrack myTrack = new SoundTrack();         // Call soundtrack class to init mute mask
 
@@ -226,7 +235,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         if (boxjump.getShipIndex() == 4)
             boxjump.setShipIndex(0);
 
-        canvas.drawBitmap(mShipFlying[boxjump.getShipIndex()], boxjump.mJetBoyX, boxjump.getCanvasHeight() - 181, null);
+        //canvas.drawBitmap(mShipFlying[boxjump.getShipIndex()], (boxjump.mJetBoyX += 10), boxjump.getCanvasHeight() - 181, null);
+        boxjump.drawBoxRunning(canvas, mShipFlying);
 
         if (boxjump.mLaserOn) {
             canvas.drawBitmap(mLaserShot, boxjump.mJetBoyX, boxjump.mJetBoyY + 32, null);
