@@ -164,6 +164,11 @@ public class BoxJumpGame {
         mShipFlying[1] = BitmapFactory.decodeResource(mRes, R.drawable.box_blue_90); // ship2_1
         mShipFlying[2] = BitmapFactory.decodeResource(mRes, R.drawable.box_blue_180); // ship2_1
         mShipFlying[3] = BitmapFactory.decodeResource(mRes, R.drawable.box_blue_270); // ship2_1
+
+        // scale box by scr_size
+        for(int i=0; i <= 3; i++) {
+            mShipFlying[i] = Bitmap.createScaledBitmap(mShipFlying[i], getBoxSize(), getBoxSize(), true);
+        }
         // rotate or use sprite ?
         // tam thoi giu 4 sprite
 
@@ -352,14 +357,18 @@ public class BoxJumpGame {
         }
     }
 
+    // TODO ko biet co fai mHeight ko, vi dang quay ngang
     private int getBounce() {
-        int box_size = mWidth*10/12 / 25; // chia ra 25 o phan box playing,
-        // screen width co vien ngoai 1/12 moi ben.
-        return mWidth*11/12 - 2*box_size; // scrn_width chia lam 12 phan --> can phai 1 phan con 11.
+        return mHeight*11/12 - 2*getBoxSize(); // scrn_width chia lam 12 phan --> can phai 1 phan con 11.
         // bo o cuoi cung cach ra. Do canvas ve start_x, y Top-Right nen cach 1 o nua.
     }
 
+    private int getBoxSize() {
+        return mHeight*10/12 / 25; // chia ra 25 o phan box playing,
+        // screen width co vien ngoai 1/12 moi ben.
+    }
+
     private int getStartLeft() {
-        return mWidth/12; // scrn_width chia lam 12 phan --> can phai 1 phan con 11.
+        return mHeight/12; // scrn_width chia lam 12 phan --> can phai 1 phan con 11.
     }
 }
