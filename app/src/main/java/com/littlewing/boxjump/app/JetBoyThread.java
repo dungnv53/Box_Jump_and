@@ -49,6 +49,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     // our intrepid space boy
     private Bitmap[] mShipFlying = new Bitmap[4];
 
+    private Bitmap[] mOrange = new Bitmap[4];
+
     // the twinkly bit
     private Bitmap[] mBeam = new Bitmap[4];
 
@@ -120,6 +122,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         mBackgroundImageTwo = BitmapFactory.decodeResource(mRes, R.drawable.background2_07); // bg_b
 
         mShipFlying = boxjump.loadShip(mShipFlying, mContext);
+
+        mOrange = boxjump.loadOrangeBox(mOrange, mContext);
         mBeam = boxjump.loadBeam(mBeam, mContext);
 
         mTimerShell = BitmapFactory.decodeResource(mRes, R.drawable.cmyk);
@@ -237,6 +241,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         //canvas.drawBitmap(mShipFlying[boxjump.getShipIndex()], (boxjump.mJetBoyX += 10), boxjump.getCanvasHeight() - 181, null);
         boxjump.drawBoxRunning(canvas, mShipFlying);
+
+        boxjump.drawOrangeWall(canvas, mOrange);
 
         if (boxjump.mLaserOn) {
             canvas.drawBitmap(mLaserShot, boxjump.mJetBoyX, boxjump.mJetBoyY + 32, null);

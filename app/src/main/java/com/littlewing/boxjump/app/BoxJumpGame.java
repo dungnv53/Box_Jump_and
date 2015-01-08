@@ -214,6 +214,15 @@ public class BoxJumpGame {
         return mExplosions;
     }
 
+    public Bitmap[] loadOrangeBox(Bitmap[] mOrange, Context mContext) {
+        Resources mRes = mContext.getResources();
+
+        mOrange[0] = BitmapFactory.decodeResource(mRes, R.drawable.orange);
+        mOrange[0] = Bitmap.createScaledBitmap(mOrange[0], getBoxSize(), getBoxSize(), true);
+
+        return mOrange;
+    }
+
     public void setJetPlaying(boolean bool) {
         this.mJetPlaying = bool;
     }
@@ -352,9 +361,17 @@ public class BoxJumpGame {
 
     public void drawBoxRunning(Canvas canvas, Bitmap[] mShipFlying) {
         canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181, null);
+
         if(mJetBoyX >= getBounce()) {
             mJetBoyX = getStartLeft();
         }
+    }
+
+    public void drawOrangeWall(Canvas canvas, Bitmap[] mOrange) {
+        for(int i=0; i<25; i++) {
+            canvas.drawBitmap(mOrange[0], (getStartLeft() + i * mOrange[0].getWidth()), getCanvasHeight() - 281, null);
+        }
+
     }
 
     // TODO ko biet co fai mHeight ko, vi dang quay ngang
@@ -363,7 +380,7 @@ public class BoxJumpGame {
         // bo o cuoi cung cach ra. Do canvas ve start_x, y Top-Right nen cach 1 o nua.
     }
 
-    private int getBoxSize() {
+    public int getBoxSize() {
         return mHeight*10/12 / 25; // chia ra 25 o phan box playing,
         // screen width co vien ngoai 1/12 moi ben.
     }
