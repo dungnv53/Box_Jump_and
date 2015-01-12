@@ -112,16 +112,16 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         setInitialGameState();
 
-        boxjump.mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.bg1); //title_hori
+        boxjump.mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.bg2); //title_hori
         boxjump.mTitleBG = Bitmap.createScaledBitmap(boxjump.mTitleBG,
                 boxjump.getCanvasWidth(), boxjump.getCanvasHeight(), true);
 
 
-        mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.background0_00); // bg_a
+        mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.bg2); // bg_a
 
         mLaserShot = BitmapFactory.decodeResource(mRes, R.drawable.laser);
 
-        mBackgroundImageNear = BitmapFactory.decodeResource(mRes, R.drawable.background2_09); // bg_b
+        mBackgroundImageNear = BitmapFactory.decodeResource(mRes, R.drawable.bg2); // bg_b
         mBackgroundImageTwo = BitmapFactory.decodeResource(mRes, R.drawable.background2_07); // bg_b
 
         mShipFlying = boxjump.loadShip(mShipFlying, mContext);
@@ -229,16 +229,17 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // same story different image...
         // TODO possible method call
 
-        canvas.drawBitmap(mBackgroundImageNear, 0, 0, null);
+//        canvas.drawBitmap(mBackgroundImageNear, 0, 0, null);
 
         // same story different image...
 
-        canvas.drawBitmap(mBackgroundImageTwo, 0, 720, null);  // 720 la hard fix
+//        canvas.drawBitmap(mBackgroundImageTwo, 0, 720, null);  // 720 la hard fix
 
         canvas.drawBitmap(mBeam[boxjump.getShipIndex()], boxjump.getCanvasWidth()/2 - 51, boxjump.getCanvasHeight()/2 + 320, null);  // y old code use m-num ?
 
         boxjump.setShipIndex(boxjump.getShipIndex() +1);
 
+        // TODO bo switch index de cho ham timer xu ly
         if (boxjump.getShipIndex() == 4)
             boxjump.setShipIndex(0);
 
@@ -263,7 +264,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         boxjump.mJetBoyY = boxjump.mJetBoyYMin;
 
         // set up jet stuff
-        initializeJetPlayer();
+//        initializeJetPlayer();
 
         boxjump.setTimer(new Timer());
 
@@ -345,9 +346,9 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                     Log.d(boxjump.TAG, "------> STARTING JET PLAY");
 
                     Log.d(boxjump.TAG, "----> " + boxjump.mJetBoyX + "<---------" + boxjump.mJetBoyY);
-                    mJet.play();
+//                    mJet.play();
 
-                    boxjump.setJetPlaying(true);
+//                    boxjump.setJetPlaying(true);
 
                 }
 
@@ -506,7 +507,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         // trying to tune the laser hit timing
         else if (System.currentTimeMillis() - boxjump.mLaserFireTime > 300) {
             // JET info: the laser sound is on track 23, we mute it (true) right away (false)
-            mJet.setMuteFlag(23, true, false);
+//            mJet.setMuteFlag(23, true, false);
 
         }
 
@@ -521,7 +522,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
             boxjump.mLaserFireTime = keyTime;
 
             // JET info: unmute the laser track (false) right away (false)
-            mJet.setMuteFlag(23, false, false);
+//            mJet.setMuteFlag(23, false, false);
         }
     }
 
@@ -552,7 +553,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                     ex.mDrawY = asteroid.mDrawY;
                     boxjump.mExplosion.add(ex);
 
-                    mJet.setMuteFlag(24, false, false);
+//                    mJet.setMuteFlag(24, false, false);
 
                     boxjump.getDangerWillRobinson().removeElementAt(i);
 
@@ -602,8 +603,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
             // When the animation completes remove the explosion
             if (ex.mAniIndex > 3) {
-                mJet.setMuteFlag(24, true, false);
-                mJet.setMuteFlag(23, true, false);
+//                mJet.setMuteFlag(24, true, false);
+//                mJet.setMuteFlag(23, true, false);
 
                 boxjump.mExplosion.removeElementAt(i);
             }
@@ -649,13 +650,13 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 if (boxjump.mCurrentBed != 7) {
                     // did it go up?
                     if (boxjump.mCurrentBed < 7) {
-                        mJet.triggerClip(7);
+//                        mJet.triggerClip(7);
                     }
 
                     boxjump.mCurrentBed = 7;
                     // JET info: change the mute mask to update the way the music plays based
                     // JET info: on the player's skills.
-                    mJet.setMuteArray(muteMask[7], false);
+//                    mJet.setMuteArray(muteMask[7], false);
 
                 }
             } else if (boxjump.mHitStreak > 24) {
@@ -663,55 +664,55 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                     if (boxjump.mCurrentBed < 6) {
                         // JET info: quite a few asteroids hit, trigger the clip with the guy's
                         // JET info: voice that encourages the player.
-                        mJet.triggerClip(6);
+//                        mJet.triggerClip(6);
                     }
 
                     boxjump.mCurrentBed = 6;
-                    mJet.setMuteArray(muteMask[6], false);
+//                    mJet.setMuteArray(muteMask[6], false);
                 }
             } else if (boxjump.mHitStreak > 20) {
                 if (boxjump.mCurrentBed != 5) {
                     if (boxjump.mCurrentBed < 5) {
-                        mJet.triggerClip(5);
+//                        mJet.triggerClip(5);
                     }
 
                     boxjump.mCurrentBed = 5;
-                    mJet.setMuteArray(muteMask[5], false);
+//                    mJet.setMuteArray(muteMask[5], false);
                 }
             } else if (boxjump.mHitStreak > 16) {
                 if (boxjump.mCurrentBed != 4) {
 
                     if (boxjump.mCurrentBed < 4) {
-                        mJet.triggerClip(4);
+//                        mJet.triggerClip(4);
                     }
                     boxjump.mCurrentBed = 4;
-                    mJet.setMuteArray(muteMask[4], false);
+//                    mJet.setMuteArray(muteMask[4], false);
                 }
             } else if (boxjump.mHitStreak > 12) {
                 if (boxjump.mCurrentBed != 3) {
                     if (boxjump.mCurrentBed < 3) {
-                        mJet.triggerClip(3);
+//                        mJet.triggerClip(3);
                     }
                     boxjump.mCurrentBed = 3;
-                    mJet.setMuteArray(muteMask[3], false);
+//                    mJet.setMuteArray(muteMask[3], false);
                 }
             } else if (boxjump.mHitStreak > 8) {
                 if (boxjump.mCurrentBed != 2) {
                     if (boxjump.mCurrentBed < 2) {
-                        mJet.triggerClip(2);
+//                        mJet.triggerClip(2);
                     }
 
                     boxjump.mCurrentBed = 2;
-                    mJet.setMuteArray(muteMask[2], false);
+//                    mJet.setMuteArray(muteMask[2], false);
                 }
             } else if (boxjump.mHitStreak > 4) {
                 if (boxjump.mCurrentBed != 1) {
 
                     if (boxjump.mCurrentBed < 1) {
-                        mJet.triggerClip(1);
+//                        mJet.triggerClip(1);
                     }
 
-                    mJet.setMuteArray(muteMask[1], false);
+//                    mJet.setMuteArray(muteMask[1], false);
 
                     boxjump.mCurrentBed = 1;
                 }
@@ -795,15 +796,16 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
             if (boxjump.mState == boxjump.STATE_PLAY) {
                 Resources res = mContext.getResources();
+                // Khoi tao lai thi fai TODO
                 mBackgroundImageFar = BitmapFactory
-                        .decodeResource(res, R.drawable.background0_00); //background_a
+                        .decodeResource(res, R.drawable.bg2); //background_a
 
                 // don't forget to resize the background image
                 mBackgroundImageFar = Bitmap.createScaledBitmap(mBackgroundImageFar,
                         boxjump.getCanvasWidth() * 2, boxjump.getCanvasHeight(), true);
 
                 mBackgroundImageNear = BitmapFactory.decodeResource(res,
-                        R.drawable.background_near); //background_b
+                        R.drawable.bg2); //background_b
 
                 // don't forget to resize the background image
                 mBackgroundImageNear = Bitmap.createScaledBitmap(mBackgroundImageNear,
