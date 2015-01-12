@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.media.JetPlayer;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,6 +17,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
+import android.widget.Button;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -237,7 +239,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         canvas.drawBitmap(mBeam[boxjump.getShipIndex()], boxjump.getCanvasWidth()/2 - 51, boxjump.getCanvasHeight()/2 + 320, null);  // y old code use m-num ?
 
-        boxjump.setShipIndex(boxjump.getShipIndex() +1);
+//        boxjump.setShipIndex(boxjump.getShipIndex() +1);
 
         // TODO bo switch index de cho ham timer xu ly
         if (boxjump.getShipIndex() == 4)
@@ -265,6 +267,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         // set up jet stuff
 //        initializeJetPlayer();
+        // TODO new init sound
+        initializeSound();
 
         boxjump.setTimer(new Timer());
 
@@ -802,7 +806,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
                 // don't forget to resize the background image
                 mBackgroundImageFar = Bitmap.createScaledBitmap(mBackgroundImageFar,
-                        boxjump.getCanvasWidth() * 2, boxjump.getCanvasHeight(), true);
+                        boxjump.getCanvasWidth(), boxjump.getCanvasHeight(), true);
 
                 mBackgroundImageNear = BitmapFactory.decodeResource(res,
                         R.drawable.bg2); //background_b
@@ -902,7 +906,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 } else {
                     boxjump.mJetBoyX=300;
                 }
-                heroMotion();
+//                heroMotion();
                 break;
             case 1:               // move right
                 if(inRange(boxjump.mJetBoyX, 150, 410)) {
@@ -910,7 +914,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 } else {
                     boxjump.mJetBoyX = 300;
                 }
-                heroMotion();
+//                heroMotion();
                 break;
             case 2:               // move up
                 if(inRange(boxjump.mJetBoyX, 360, 235)) {
@@ -918,7 +922,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 } else {
                     boxjump.mJetBoyX  = 470;
                 }
-                heroMotion();
+//                heroMotion();
                 break;
             case 3:               // move down
                 if(inRange(boxjump.mJetBoyY, 360, 235)) {
@@ -926,7 +930,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 } else {
                     boxjump.mJetBoyY = 480;
                 }
-                heroMotion();
+//                heroMotion();
                 break;
 
         }
@@ -1086,6 +1090,10 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
     public static BoxJumpGame getBoxjump() {
         return boxjump;
+    }
+
+    public static void initializeSound() {
+//        final MediaPlayer mp = MediaPlayer.create(this, R.raw.music2);
     }
 
 }//end thread class

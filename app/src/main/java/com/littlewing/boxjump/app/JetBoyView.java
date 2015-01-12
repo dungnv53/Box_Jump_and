@@ -22,6 +22,7 @@ package com.littlewing.boxjump.app;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -65,6 +66,9 @@ public class JetBoyView extends SurfaceView implements SurfaceHolder.Callback {
     // private Button mButtonRestart; 
     private TextView mTextView;
 
+    private  Context mContext;
+    private MediaPlayer mpx;
+
     /**
      * The constructor called from the main JetBoy activity
      * 
@@ -73,6 +77,7 @@ public class JetBoyView extends SurfaceView implements SurfaceHolder.Callback {
      */
     public JetBoyView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.mContext = context;
 
         // register our interest in hearing about changes to our surface
         SurfaceHolder holder = getHolder();
@@ -115,6 +120,9 @@ public class JetBoyView extends SurfaceView implements SurfaceHolder.Callback {
         setFocusable(true); // make sure we get key events
 
         Log.d(TAG, "@@@ done creating view!");
+
+        mpx = MediaPlayer.create(context, R.raw.music2);
+        mpx.start();
     }
 
     

@@ -1,6 +1,7 @@
 package com.littlewing.boxjump.app;
 
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +13,8 @@ public class ArchAngle extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.music2);
+        mp.start();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_arch_angle);
     }

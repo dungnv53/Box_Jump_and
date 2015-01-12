@@ -38,6 +38,8 @@ public class BoxJumpGame {
 
     public static final double GRAVITY = 9.81;
     public static double time = 0;
+    private double cosAlpha = 0.71; // sqrt(2)/2
+    private double sinAlpha = 0.71;
 
     public static final int BOX_STEP = 10; // box run 10px per step
 
@@ -365,32 +367,34 @@ public class BoxJumpGame {
 
     public void drawBoxRunning(Canvas canvas, Bitmap[] mShipFlying) {
         // Test gravity jumping
-        double cosAlpha = 0.71; // sqrt(2)/2
-        double sinAlpha = 0.71;
         double velocityX = 0, velocityY = 0;
 
         int veloStart = 10;
 
         time += 0.2;
-        velocityX = veloStart * cosAlpha * time;
-        velocityY = (veloStart * sinAlpha * time) + (GRAVITY*time*time)/2;
+        velocityX = veloStart * cosAlpha * time; // max 10*.7*3 = 21
+        velocityY = (veloStart * sinAlpha * time) + (GRAVITY*time*time); // ~242 max
 
         int startY = getCanvasHeight() - 181;
 
-        int box_x = (int) (mJetBoyX += BOX_STEP);
+        int box_x = mJetBoyX;
+        box_x += (velocityX);
         int box_y = (int) (startY - velocityY); // Vi height tinh tu tren xuong (hay tu trai qua)
 
-        if(box_y < (getCanvasHeight()-400)) {
-            box_y = (int) (startY - velocityY);
-        }
+//        if(box_y < (getCanvasHeight()-400)) {
+//            sinAlpha = -sinAlpha;
+//        } else if(box_y > startY) {
+//            sinAlpha = 0.71;
+//        }
 
         if(time > 6) {
             time = 0;
-//            int idx = this.getShipIndex();
-//            idx++;
-//            this.setShipIndex(idx%4);
+            int idx = this.getShipIndex();
+            idx++;
+            this.setShipIndex(idx%4);
         }
         Log.e(TAG, "box-x " + box_x + " box-y: " +box_y);
+        Log.e(TAG, "CV Wd " + getCanvasWidth() + " CV HEI: " +getCanvasHeight());
 
 
         canvas.drawBitmap(mShipFlying[getShipIndex()], box_x, box_y, null);
@@ -408,7 +412,7 @@ public class BoxJumpGame {
 
     public void drawOrangeWall(Canvas canvas, Bitmap[] mOrange) {
         for(int i=0; i<25; i++) {
-            canvas.drawBitmap(mOrange[0], (getStartLeft() + i * mOrange[0].getWidth()), getCanvasHeight() - 281, null);
+            canvas.drawBitmap(mOrange[0], (getStartLeft() + i * mOrange[0].getWidth()), getCanvasHeight() - 181, null);
         }
 
     }
