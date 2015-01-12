@@ -113,6 +113,9 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         setInitialGameState();
 
         boxjump.mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.bg1); //title_hori
+        boxjump.mTitleBG = Bitmap.createScaledBitmap(boxjump.mTitleBG,
+                boxjump.getCanvasWidth(), boxjump.getCanvasHeight(), true);
+
 
         mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.background0_00); // bg_a
 
@@ -844,6 +847,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE:
+                // Simulate jumping gravity
                 if (inRange(x, 220, 120) && inRange(y, 860, 260)) { // tap on left side TODO hardcode
                     boxjump.MOVE_DIR = boxjump.DIR_LEFT; // move to left, set DIR
                     heroMove(12, boxjump.LEFT);

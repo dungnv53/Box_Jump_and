@@ -360,7 +360,25 @@ public class BoxJumpGame {
     }
 
     public void drawBoxRunning(Canvas canvas, Bitmap[] mShipFlying) {
-        canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181, null);
+        // Test gravity jumping
+        int gravity = 9;
+        int tmp = 0;
+        tmp++;
+        int velocity = 0;
+
+
+        if(velocity < BOX_STEP*2) {
+            velocity += gravity*tmp*tmp/2;  // step /2 for slower test
+            canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181 - velocity, null);
+        } else {
+            velocity -= gravity*tmp*tmp/2;  // step /2 for slower test
+            canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181 + velocity, null);
+        }
+//        velocity -= gravity*tmp*tmp/2;
+//        canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181 + velocity, null);
+
+//        canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181, null);
+
 
         if(mJetBoyX >= getBounce()) {
             mJetBoyX = getStartLeft();
