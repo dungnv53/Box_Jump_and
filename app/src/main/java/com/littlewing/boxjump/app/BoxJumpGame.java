@@ -41,6 +41,10 @@ public class BoxJumpGame {
     private double cosAlpha = 0.71; // sqrt(2)/2
     private double sinAlpha = 0.71;
 
+    private boolean isJumping = false;
+    private int yVel = 0;
+    private int characterGround = 432; // TODO
+
     public static final int BOX_STEP = 10; // box run 10px per step
 
     // used to calculate level for mutes and trigger clip
@@ -371,15 +375,12 @@ public class BoxJumpGame {
 
         int veloStart = 10;
 
-        time += 0.2;
+        time += 0.1;
         velocityX = veloStart * cosAlpha * time; // max 10*.7*3 = 21
-        velocityY = (veloStart * sinAlpha * time) + (GRAVITY*time*time); // ~242 max
+//        velocityY = (veloStart * sinAlpha * time) + (GRAVITY*time*time); // ~242 max
 
-        int startY = getCanvasHeight() - 181;
-
-        int box_x = mJetBoyX;
-        box_x += (velocityX);
-        int box_y = (int) (startY - velocityY); // Vi height tinh tu tren xuong (hay tu trai qua)
+        mJetBoyX += BOX_STEP;
+//        int box_y = (int) (startY - velocityY); // Vi height tinh tu tren xuong (hay tu trai qua)
 
 //        if(box_y < (getCanvasHeight()-400)) {
 //            sinAlpha = -sinAlpha;
@@ -393,11 +394,26 @@ public class BoxJumpGame {
             idx++;
             this.setShipIndex(idx%4);
         }
-        Log.e(TAG, "box-x " + box_x + " box-y: " +box_y);
+        Log.e(TAG, "box-x " + mJetBoyX + " box-y: " +mJetBoyY);
         Log.e(TAG, "CV Wd " + getCanvasWidth() + " CV HEI: " +getCanvasHeight());
 
+        double gravity = 1.2;
 
-        canvas.drawBitmap(mShipFlying[getShipIndex()], box_x, box_y, null);
+        if (isJumping) {
+            yVel += gravity;
+            mJetBoyY += yVel;   // de - thi jump nhanh
+            // + thif jump min nhung thap
+//            if (mJetBoyY < characterGround) {
+            if (mJetBoyY > characterGround) {
+                mJetBoyY = characterGround;
+//                mJetBoyY = getCanvasHeight()-181;
+                yVel = 0;
+                isJumping = false;
+            }
+        }
+        this.jump();
+
+        canvas.drawBitmap(mShipFlying[getShipIndex()], mJetBoyX, mJetBoyY, null);
 //        velocity -= gravity*tmp*tmp/2;
 //        canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181 + velocity, null);
 
@@ -410,6 +426,12 @@ public class BoxJumpGame {
 
     }
 
+    public void jump() {
+        if (isJumping == false) {
+            yVel = -15;
+            isJumping = true;
+        }
+    }
     public void drawOrangeWall(Canvas canvas, Bitmap[] mOrange) {
         for(int i=0; i<25; i++) {
             canvas.drawBitmap(mOrange[0], (getStartLeft() + i * mOrange[0].getWidth()), getCanvasHeight() - 181, null);
