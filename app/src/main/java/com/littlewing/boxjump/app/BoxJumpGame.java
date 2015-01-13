@@ -141,7 +141,7 @@ public class BoxJumpGame {
     // how far up (close to top) jet boy can fly
     public int mJetBoyYMin = mWidth/3*2; //40;
     public int mJetBoyX = (int)mWidth/2; //0;
-    public int mJetBoyY = (int)mHeight/3*2; //0;
+    public int mJetBoyY = (int)mHeight*3/4; //0;
 
     // this is the pixel position of the laser beam guide.
     public int mAsteroidMoveLimitX = 110;

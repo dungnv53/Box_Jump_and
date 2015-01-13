@@ -114,16 +114,16 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         setInitialGameState();
 
-        boxjump.mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.bg2); //title_hori
+        boxjump.mTitleBG = BitmapFactory.decodeResource(mRes, R.drawable.bg1); //title_hori
         boxjump.mTitleBG = Bitmap.createScaledBitmap(boxjump.mTitleBG,
                 boxjump.getCanvasWidth(), boxjump.getCanvasHeight(), true);
 
 
-        mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.bg2); // bg_a
+        mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.bg1); // bg_a
 
         mLaserShot = BitmapFactory.decodeResource(mRes, R.drawable.laser);
 
-        mBackgroundImageNear = BitmapFactory.decodeResource(mRes, R.drawable.bg2); // bg_b
+        mBackgroundImageNear = BitmapFactory.decodeResource(mRes, R.drawable.bg1); // bg_b
         mBackgroundImageTwo = BitmapFactory.decodeResource(mRes, R.drawable.background2_07); // bg_b
 
         mShipFlying = boxjump.loadShip(mShipFlying, mContext);
@@ -210,6 +210,13 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         if (boxjump.mState == boxjump.STATE_RUNNING) {
             doDrawRunning(canvas);
+//            try {
+//                doDrawRunning(canvas);
+//            } catch(NullPointerException null_p_e) {
+//                System.exit(1);
+//            } finally {
+//                doDrawRunning(canvas);
+//            }
         } else if (boxjump.mState == boxjump.STATE_START) {
             doDrawReady(canvas);
         } else if (boxjump.mState == boxjump.STATE_PLAY || boxjump.mState == boxjump.STATE_LOSE) {
@@ -325,6 +332,12 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
     private void doDrawReady(Canvas canvas) {
         canvas.drawBitmap(boxjump.mTitleBG, 0, 0, null);
+//        try {
+//            canvas.drawBitmap(boxjump.mTitleBG, 0, 0, null);
+//        } catch (NullPointerException e) {
+//            System.exit(1);
+//        }
+
     }
 
     private void doDrawPlay(Canvas canvas) {
@@ -378,6 +391,9 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
             } else if (boxjump.mState == boxjump.STATE_LOSE) {
                 boxjump.mInitialized = false;
             }
+//            else {
+//                return; // Default
+//            }
 
             try {
                 c = mSurfaceHolder.lockCanvas(null);
@@ -802,14 +818,14 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 Resources res = mContext.getResources();
                 // Khoi tao lai thi fai TODO
                 mBackgroundImageFar = BitmapFactory
-                        .decodeResource(res, R.drawable.bg2); //background_a
+                        .decodeResource(res, R.drawable.bg1); //background_a
 
                 // don't forget to resize the background image
                 mBackgroundImageFar = Bitmap.createScaledBitmap(mBackgroundImageFar,
                         boxjump.getCanvasWidth(), boxjump.getCanvasHeight(), true);
 
                 mBackgroundImageNear = BitmapFactory.decodeResource(res,
-                        R.drawable.bg2); //background_b
+                        R.drawable.bg1); //background_b
 
                 // don't forget to resize the background image
                 mBackgroundImageNear = Bitmap.createScaledBitmap(mBackgroundImageNear,
