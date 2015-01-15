@@ -411,7 +411,7 @@ public class BoxJumpGame {
                 isJumping = false;
             }
         }
-        this.jump();
+//        this.jump();
 
         canvas.drawBitmap(mShipFlying[getShipIndex()], mJetBoyX, mJetBoyY, null);
 //        velocity -= gravity*tmp*tmp/2;

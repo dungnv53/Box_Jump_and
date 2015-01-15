@@ -866,6 +866,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         int y = (int)event.getY();
         Log.d("x = ", x+" \n -*-");
         Log.d("y = ", y+ "\n -*-");
+        boxjump.jump();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE:
@@ -886,6 +887,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
                 }
                 break;
             case MotionEvent.ACTION_DOWN:
+                boxjump.jump();
                 break;
             case MotionEvent.ACTION_UP:
                 break;
