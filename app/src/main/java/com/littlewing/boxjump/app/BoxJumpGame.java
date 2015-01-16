@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.os.Handler;
 import android.util.Log;
 
 import java.util.Random;
@@ -43,7 +44,7 @@ public class BoxJumpGame {
 
     private boolean isJumping = false;
     private int yVel = 0;
-    private int characterGround = 432; // TODO
+    private int characterGround = 480; // TODO
 
     public static final int BOX_STEP = 10; // box run 10px per step
 
@@ -233,6 +234,15 @@ public class BoxJumpGame {
         return mOrange;
     }
 
+    public Bitmap[] loadBaseLine(Bitmap[] mLine, Context mContext) {
+        Resources mRes = mContext.getResources();
+
+        mLine[0] = BitmapFactory.decodeResource(mRes, R.drawable.base_line);
+        mLine[0] = Bitmap.createScaledBitmap(mLine[0], 1080, 8, true);
+
+        return mLine;
+    }
+
     public void setJetPlaying(boolean bool) {
         this.mJetPlaying = bool;
     }
@@ -375,7 +385,7 @@ public class BoxJumpGame {
 
         int veloStart = 10;
 
-        time += 0.1;
+        time += 0.3;
         velocityX = veloStart * cosAlpha * time; // max 10*.7*3 = 21
 //        velocityY = (veloStart * sinAlpha * time) + (GRAVITY*time*time); // ~242 max
 
@@ -404,7 +414,7 @@ public class BoxJumpGame {
             mJetBoyY += yVel;   // de - thi jump nhanh
             // + thif jump min nhung thap
 //            if (mJetBoyY < characterGround) {
-            if (mJetBoyY > characterGround) {
+            if (mJetBoyY > characterGround) {  // Box chim qua sau --> cho noi len mat nc
                 mJetBoyY = characterGround;
 //                mJetBoyY = getCanvasHeight()-181;
                 yVel = 0;
@@ -437,6 +447,10 @@ public class BoxJumpGame {
             canvas.drawBitmap(mOrange[0], (getStartLeft() + i * mOrange[0].getWidth()), getCanvasHeight() - 181, null);
         }
 
+    }
+
+    public void drawBaseLine(Canvas line, Bitmap[] mLine) {
+        line.drawBitmap(mLine[0], getStartLeft(), getCanvasHeight() - 170, null);
     }
 
     // TODO ko biet co fai mHeight ko, vi dang quay ngang

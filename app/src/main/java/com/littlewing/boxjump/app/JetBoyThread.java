@@ -52,6 +52,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     private Bitmap[] mShipFlying = new Bitmap[4];
 
     private Bitmap[] mOrange = new Bitmap[4];
+    private Bitmap[] mLine= new Bitmap[4];
 
     // the twinkly bit
     private Bitmap[] mBeam = new Bitmap[4];
@@ -129,6 +130,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         mShipFlying = boxjump.loadShip(mShipFlying, mContext);
 
         mOrange = boxjump.loadOrangeBox(mOrange, mContext);
+        mOrange = boxjump.loadBaseLine(mLine, mContext);
+
         mBeam = boxjump.loadBeam(mBeam, mContext);
 
         mTimerShell = BitmapFactory.decodeResource(mRes, R.drawable.cmyk);
@@ -210,6 +213,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         if (boxjump.mState == boxjump.STATE_RUNNING) {
             doDrawRunning(canvas);
+
 //            try {
 //                doDrawRunning(canvas);
 //            } catch(NullPointerException null_p_e) {
@@ -255,7 +259,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
         //canvas.drawBitmap(mShipFlying[boxjump.getShipIndex()], (boxjump.mJetBoyX += 10), boxjump.getCanvasHeight() - 181, null);
         boxjump.drawBoxRunning(canvas, mShipFlying);
 
-        boxjump.drawOrangeWall(canvas, mOrange);
+//        boxjump.drawOrangeWall(canvas, mOrange);
+        boxjump.drawBaseLine(canvas, mLine);
 
         if (boxjump.mLaserOn) {
             canvas.drawBitmap(mLaserShot, boxjump.mJetBoyX, boxjump.mJetBoyY + 32, null);
@@ -264,6 +269,12 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         // tick tock
         canvas.drawBitmap(mTimerShell, 0, 0, null); // mCanvasWidth - mTimerShell.getWidth()
+
+//        try {
+//            Thread.sleep(100);                 //1000 milliseconds is one second.
+//        } catch(InterruptedException ex) {
+//            return;
+//        }
 
     }
 
