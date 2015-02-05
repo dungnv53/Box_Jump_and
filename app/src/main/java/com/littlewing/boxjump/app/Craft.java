@@ -15,6 +15,12 @@ public class Craft {
     private int max_hp = 56;
     private int idx;
 
+    // Theo phaser thi them velocity
+    // Object Velocity velocity;
+    private int velocity;  // double huh ?
+
+    private int gravity;
+
     private int e_boss_move_dir = 10;
     private int e_boss_x = 0;
     Random rnd = new Random();

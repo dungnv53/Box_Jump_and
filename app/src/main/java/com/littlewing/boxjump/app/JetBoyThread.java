@@ -94,6 +94,9 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     // JET info: 82 is used as game time for 1/4 note beat.
     private final byte NEW_ASTEROID_EVENT = 80;
 
+    private long time;
+    private final int fps = 20;
+
     public JetBoyThread(SurfaceHolder surfaceHolder, Context context, Handler handler) {
 
         mSurfaceHolder = surfaceHolder;
@@ -362,63 +365,69 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
     public void run() {
         // while running do stuff in this loop...bzzz!
         while (boxjump.getRun()) {
+//            long cTime = System.currentTimeMillis();
+
             Canvas c = null;
 
-            if (boxjump.mState == boxjump.STATE_RUNNING) {
-                // Process any input and apply it to the game state
-                updateGameState();
+//            if ((cTime - time) <= (1000 / fps)) {
 
-                if (!boxjump.getJetPlaying()) {
+                if (boxjump.mState == boxjump.STATE_RUNNING) {
+                    // Process any input and apply it to the game state
+                    updateGameState();
 
+                    if (!boxjump.getJetPlaying()) {
+
+                        boxjump.mInitialized = false;
+                        Log.d(boxjump.TAG, "------> STARTING JET PLAY");
+
+                        Log.d(boxjump.TAG, "----> " + boxjump.mJetBoyX + "<---------" + boxjump.mJetBoyY);
+                        //                    mJet.play();
+
+                        //                    boxjump.setJetPlaying(true);
+
+                    }
+
+                    boxjump.setPassedTime(System.currentTimeMillis());
+
+                    // kick off the timer task for counter update if not already
+                    // initialized
+                    if (boxjump.getTimerTask() == null) {
+                        boxjump.setTimerTask(new TimerTask() {
+                            public void run() {
+                                doCountDown();
+                            }
+                        });
+
+                        boxjump.getTimer().schedule(boxjump.getTimerTask(), boxjump.mTaskIntervalInMillis);
+
+                    }// end of TimerTask init block
+
+                }// end of STATE_RUNNING block
+                else if (boxjump.mState == boxjump.STATE_PLAY && !boxjump.mInitialized) {
+                    setInitialGameState();
+                } else if (boxjump.mState == boxjump.STATE_LOSE) {
                     boxjump.mInitialized = false;
-                    Log.d(boxjump.TAG, "------> STARTING JET PLAY");
-
-                    Log.d(boxjump.TAG, "----> " + boxjump.mJetBoyX + "<---------" + boxjump.mJetBoyY);
-//                    mJet.play();
-
-//                    boxjump.setJetPlaying(true);
-
                 }
+                //            else {
+                //                return; // Default
+                //            }
 
-                boxjump.setPassedTime(System.currentTimeMillis());
+                try {
+                    c = mSurfaceHolder.lockCanvas(null);
+                    // synchronized (mSurfaceHolder) {
+                    doDraw(c);
+                    // }
+                } finally {
+                    // do this in a finally so that if an exception is thrown
+                    // during the above, we don't leave the Surface in an
+                    // inconsistent state
+                    if (c != null) {
+                        mSurfaceHolder.unlockCanvasAndPost(c);
+                    }
+                }// end finally block
 
-                // kick off the timer task for counter update if not already
-                // initialized
-                if (boxjump.getTimerTask() == null) {
-                    boxjump.setTimerTask(new TimerTask() {
-                        public void run() {
-                            doCountDown();
-                        }
-                    });
-
-                    boxjump.getTimer().schedule(boxjump.getTimerTask(), boxjump.mTaskIntervalInMillis);
-
-                }// end of TimerTask init block
-
-            }// end of STATE_RUNNING block
-            else if (boxjump.mState == boxjump.STATE_PLAY && !boxjump.mInitialized)
-            {
-                setInitialGameState();
-            } else if (boxjump.mState == boxjump.STATE_LOSE) {
-                boxjump.mInitialized = false;
-            }
-//            else {
-//                return; // Default
-//            }
-
-            try {
-                c = mSurfaceHolder.lockCanvas(null);
-                // synchronized (mSurfaceHolder) {
-                doDraw(c);
-                // }
-            } finally {
-                // do this in a finally so that if an exception is thrown
-                // during the above, we don't leave the Surface in an
-                // inconsistent state
-                if (c != null) {
-                    mSurfaceHolder.unlockCanvasAndPost(c);
-                }
-            }// end finally block
+//                time = cTime;
+//            } // end FPS
         }// end while mrun block
     }
 
