@@ -251,7 +251,7 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
 //        canvas.drawBitmap(mBackgroundImageTwo, 0, 720, null);  // 720 la hard fix
 
-        canvas.drawBitmap(mBeam[boxjump.getShipIndex()], boxjump.getCanvasWidth()/2 - 51, boxjump.getCanvasHeight()/2 + 320, null);  // y old code use m-num ?
+//        canvas.drawBitmap(mBeam[boxjump.getShipIndex()], boxjump.getCanvasWidth()/2 - 51, boxjump.getCanvasHeight()/2 + 320, null);  // y old code use m-num ?
 
 //        boxjump.setShipIndex(boxjump.getShipIndex() +1);
 
@@ -265,19 +265,21 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 //        boxjump.drawOrangeWall(canvas, mOrange);
         boxjump.drawBaseLine(canvas, mLine);
 
-        if (boxjump.mLaserOn) {
-            canvas.drawBitmap(mLaserShot, boxjump.mJetBoyX, boxjump.mJetBoyY + 32, null);
+        if (boxjump.mLaserOn) { // Tat laser di, ko dung.
+//            canvas.drawBitmap(mLaserShot, boxjump.mJetBoyX, boxjump.mJetBoyY + 32, null);
             Log.d(boxjump.TAG, " drawing shot " + boxjump.mJetBoyX + " at " + boxjump.mJetBoyY);
         }
 
         // tick tock
-        canvas.drawBitmap(mTimerShell, 0, 0, null); // mCanvasWidth - mTimerShell.getWidth()
+//        canvas.drawBitmap(mTimerShell, 0, 0, null); // mCanvasWidth - mTimerShell.getWidth()
 
 //        try {
 //            Thread.sleep(100);                 //1000 milliseconds is one second.
 //        } catch(InterruptedException ex) {
 //            return;
 //        }
+
+        doAsteroidAnimation(canvas);
 
     }
 
@@ -339,6 +341,8 @@ class JetBoyThread extends Thread implements JetPlayer.OnJetEventListener {
 
         this.angle += 0.1;
         this.angel.bernoulliMove(angle);
+        // fix-me
+        Log.e(boxjump.TAG, "angel " + angel.getDonaldX() + " y " + angel.getDonaldY());
 
         canvas.drawBitmap(angel.getBossImage(), angel.getDonaldX(), angel.getDonaldY(), null);
 

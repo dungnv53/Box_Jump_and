@@ -206,13 +206,13 @@ public class Craft {
     // TODO need fps, inp, screen width
     public void bernoulliMove(double angle) {
         angle = angle%360;
-        this.dn_x = 360+getBernoulliMark(angle).x;
-        this.dn_y = 240+getBernoulliMark(angle).y;
+        this.dn_x = 100+getBernoulliMark(angle).x;
+        this.dn_y = 100+getBernoulliMark(angle).y;
     }
 
     // TODO rm magic numb
     public Point getBernoulliMark(double angle) {
-        int a = 340; //680/2; // (960/sqrt(2))
+        int a = 140; //680/2; // (960/sqrt(2))
         double x = a*Math.sqrt(2)*Math.cos(angle)/(Math.sin(angle)*Math.sin(angle) + 1);
         double y = a*Math.sqrt(2)*Math.cos(angle)*Math.sin(angle)/(Math.sin(angle)*Math.sin(angle) + 1);
         Point result = new Point((int)x, (int)y);

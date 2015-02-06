@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.os.Handler;
 import android.util.Log;
 
@@ -46,7 +47,7 @@ public class BoxJumpGame {
     private int yVel = 0;
     private int characterGround = 480; // TODO
 
-    public static final int BOX_STEP = 10; // box run 10px per step
+    public static final int BOX_STEP = 6; // box run 10px per step
 
     // used to calculate level for mutes and trigger clip
     public int mHitStreak = 0;
@@ -164,6 +165,8 @@ public class BoxJumpGame {
     // Speed of BG move
     private int FarBGSpeed = 0;
     private int NearBGSpeed = 0;
+
+    public int rotation = 0;
 
     public BoxJumpGame() {
         super();
@@ -385,60 +388,67 @@ public class BoxJumpGame {
 
         int veloStart = 10;
 
-        time += 0.3;
         velocityX = veloStart * cosAlpha * time; // max 10*.7*3 = 21
 //        velocityY = (veloStart * sinAlpha * time) + (GRAVITY*time*time); // ~242 max
 
         mJetBoyX += BOX_STEP;
-//        int box_y = (int) (startY - velocityY); // Vi height tinh tu tren xuong (hay tu trai qua)
 
-//        if(box_y < (getCanvasHeight()-400)) {
-//            sinAlpha = -sinAlpha;
-//        } else if(box_y > startY) {
-//            sinAlpha = 0.71;
-//        }
-
-        if(time > 6) {
-            time = 0;
-            int idx = this.getShipIndex();
-            idx++;
-            this.setShipIndex(idx%4);
-        }
         Log.e(TAG, "box-x " + mJetBoyX + " box-y: " +mJetBoyY);
         Log.e(TAG, "CV Wd " + getCanvasWidth() + " CV HEI: " +getCanvasHeight());
 
-        double gravity = 1.2;
+        double gravity = 3;
+
+        Matrix matrix = new Matrix();
 
         if (isJumping) {
+
+            rotation += 10;
+            float px = mJetBoyX + this.getBoxSize()/2;
+            float py = mJetBoyY + this.getBoxSize()/2;
+            matrix.postTranslate(-mShipFlying[getShipIndex()].getWidth()/2, -mShipFlying[getShipIndex()].getHeight()/2);
+
+            matrix.postRotate(rotation); // Quay 180 hay 90
+            matrix.postTranslate(px, py);
+            canvas.drawBitmap(mShipFlying[getShipIndex()], matrix, null);
+
+            mJetBoyX += 4; // hard code
+
             yVel += gravity;
+
             mJetBoyY += yVel;   // de - thi jump nhanh
-            // + thif jump min nhung thap
-//            if (mJetBoyY < characterGround) {
+
             if (mJetBoyY > characterGround) {  // Box chim qua sau --> cho noi len mat nc
                 mJetBoyY = characterGround;
-//                mJetBoyY = getCanvasHeight()-181;
                 yVel = 0;
                 isJumping = false;
             }
+
+            // reset time to 0. If want independence - > use function.
+        } else {
+            matrix.postTranslate(mJetBoyX, mJetBoyY);
+            canvas.drawBitmap(mShipFlying[getShipIndex()], matrix, null);
         }
-//        this.jump();
 
-        canvas.drawBitmap(mShipFlying[getShipIndex()], mJetBoyX, mJetBoyY, null);
-//        velocity -= gravity*tmp*tmp/2;
-//        canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181 + velocity, null);
-
-//        canvas.drawBitmap(mShipFlying[getShipIndex()], (mJetBoyX += BOX_STEP), getCanvasHeight() - 181, null);
-
+//        canvas.drawBitmap(mShipFlying[getShipIndex()], matrix, null);
+//        canvas.drawBitmap(mShipFlying[getShipIndex()], mJetBoyX, mJetBoyY, null);
 
         if(mJetBoyX >= getBounce()) {
             mJetBoyX = getStartLeft();
+            // win, new level
         }
 
     }
 
+    // In some game Engine, this task done by TWEEN
+    // It will do thing in amount of TIME
+    // like jumping A to B in 2 seconds
+    // The height of jumping is another variable (body.velocity.y) and is dependence
+    // engine auto compute angle when jump based on the height of jump
+    // TODO apply this task
+
     public void jump() {
         if (isJumping == false) {
-            yVel = -15;
+            yVel = -30;
             isJumping = true;
         }
     }
@@ -450,7 +460,7 @@ public class BoxJumpGame {
     }
 
     public void drawBaseLine(Canvas line, Bitmap[] mLine) {
-        line.drawBitmap(mLine[0], getStartLeft(), getCanvasHeight() - 170, null);
+        line.drawBitmap(mLine[0], getStartLeft(), characterGround+getBoxSize(), null);
     }
 
     // TODO ko biet co fai mHeight ko, vi dang quay ngang
